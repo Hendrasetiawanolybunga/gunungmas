@@ -1,0 +1,91 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Pendaftaran Pelanggan Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'pelanggan_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Pelanggan
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Tambah Pelanggan Baru</h4>
+    <p class="text-secondary small mb-0">Isi biodata lengkap pelanggan untuk mempermudah pemesanan tiket.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Biodata Pelanggan</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'pelanggan_add' %}" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Nama Pelanggan -->
+                    <div class="mb-4">
+                        <label for="nama_pelanggan" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nama Lengkap Pelanggan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" name="nama_pelanggan" id="nama_pelanggan" class="form-control border-start-0 ps-1" placeholder="Contoh: Mario Nagung" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Jenis Kelamin -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary d-block" style="font-size: 13px;">Jenis Kelamin</label>
+                        <div class="form-check form-check-inline mt-1">
+                            <input class="form-check-input" type="radio" name="jenis_kelamin" id="jk_l" value="Laki-laki" checked required>
+                            <label class="form-check-label text-dark" for="jk_l"><i class="fa-solid fa-mars text-primary me-1"></i> Laki-laki</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="jenis_kelamin" id="jk_p" value="Perempuan" required>
+                            <label class="form-check-label text-dark" for="jk_p"><i class="fa-solid fa-venus text-danger me-1"></i> Perempuan</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Nomor Telpon -->
+                    <div class="mb-4">
+                        <label for="nomor_telpon" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nomor Telepon / WhatsApp</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-phone"></i></span>
+                            <input type="text" name="nomor_telpon" id="nomor_telpon" class="form-control border-start-0 ps-1 font-monospace" placeholder="Contoh: 081234567890" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <label for="email" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Alamat Email (Opsional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" id="email" class="form-control border-start-0 ps-1" placeholder="Contoh: pelanggan@email.com">
+                        </div>
+                    </div>
+                    
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Password (Opsional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-lock"></i></span>
+                            <input type="text" name="password" id="password" class="form-control border-start-0 ps-1" placeholder="Masukkan password untuk pelanggan">
+                        </div>
+                    </div>
+                    
+                    <!-- Alamat -->
+                    <div class="mb-4">
+                        <label for="alamat" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Alamat Rumah</label>
+                        <textarea name="alamat" id="alamat" class="form-control" rows="3" placeholder="Masukkan alamat lengkap pelanggan..." required></textarea>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'pelanggan_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Pelanggan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

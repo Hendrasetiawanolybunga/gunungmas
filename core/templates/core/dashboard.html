@@ -1,0 +1,357 @@
+{% extends 'core/base_dashboard.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Premium card dashboard styles */
+    .welcome-banner {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        border-radius: 20px;
+        padding: 30px;
+        color: #ffffff;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(49, 46, 129, 0.15);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out forwards;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .welcome-banner::after {
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+        top: -50px;
+        right: -50px;
+        border-radius: 50%;
+    }
+
+    .welcome-title {
+        font-weight: 700;
+        font-size: 26px;
+        margin-bottom: 8px;
+    }
+
+    .welcome-text {
+        color: #cbd5e1;
+        font-size: 14px;
+        max-width: 600px;
+        margin-bottom: 0;
+    }
+
+    .metric-card {
+        border: none;
+        border-radius: 20px;
+        padding: 24px;
+        color: #ffffff;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-bus {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    }
+
+    .card-route {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .card-schedule {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .card-booking {
+        background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    }
+
+    .metric-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 45px;
+        opacity: 0.25;
+        transition: transform 0.3s ease;
+    }
+
+    .metric-card:hover .metric-icon {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    .metric-value {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 10px 0 5px 0;
+        line-height: 1;
+    }
+
+    .metric-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.85);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .recent-activity-card {
+        background-color: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        padding: 24px;
+        height: 100%;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .bg-light-blue { background-color: #eff6ff; color: #3b82f6; }
+    .bg-light-green { background-color: #ecfdf5; color: #10b981; }
+    .bg-light-orange { background-color: #fffbeb; color: #f59e0b; }
+
+    .activity-details {
+        flex-grow: 1;
+    }
+
+    .activity-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .activity-desc {
+        font-size: 11.5px;
+        color: #64748b;
+        margin: 2px 0 0 0;
+    }
+
+    .activity-time {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tech-clock-container {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(99, 102, 241, 0.4);
+        border-radius: 12px;
+        padding: 12px 20px;
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        text-align: center;
+        font-family: 'Courier New', Courier, monospace;
+        min-width: 180px;
+        z-index: 2;
+    }
+    .tech-clock-label {
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: #818cf8;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    .tech-clock-time {
+        font-size: 24px;
+        font-weight: 700;
+        color: #6366f1;
+        text-shadow: 0 0 10px rgba(99, 102, 241, 0.8), 0 0 20px rgba(99, 102, 241, 0.4);
+        letter-spacing: 1px;
+    }
+</style>
+
+<!-- Welcome Section -->
+<div class="welcome-banner">
+    <div>
+        <h2 class="welcome-title">Selamat Datang Kembali, {% if request.session.admin_username %}{{ request.session.admin_username }}{% else %}Admin{% endif %}!</h2>
+        <p class="welcome-text">
+            Panel manajemen Agen Bus Gunung Mas Ruteng. Di sini Anda dapat mengelola ketersediaan armada bus, mengatur rute perjalanan, menjadwalkan keberangkatan, serta mengawasi seluruh transaksi pemesanan tiket dengan mudah.
+        </p>
+    </div>
+    <div class="tech-clock-container">
+        <div class="tech-clock-label">SYSTEM TIME (WITA)</div>
+        <div id="jam-digital-futuristik" class="tech-clock-time">00:00:00</div>
+    </div>
+</div>
+
+<!-- Metrics Grid -->
+<div class="row g-4 mb-4">
+    <!-- Bus Card -->
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card card-bus">
+            <i class="fa-solid fa-bus-simple metric-icon"></i>
+            <div class="metric-label">Total Armada Bus</div>
+            <div>
+                <h3 class="metric-value">{{ total_bus }}</h3>
+                <div class="small text-white-50"><i class="fa-solid fa-check-circle me-1"></i> Semua aktif beroperasi</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Route Card -->
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card card-route">
+            <i class="fa-solid fa-route metric-icon"></i>
+            <div class="metric-label">Rute Perjalanan</div>
+            <div>
+                <h3 class="metric-value">{{ total_rute }}</h3>
+                <div class="small text-white-50"><i class="fa-solid fa-location-dot me-1"></i> Terhubung di Flores</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Schedule Card -->
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card card-schedule">
+            <i class="fa-solid fa-calendar-days metric-icon"></i>
+            <div class="metric-label">Jadwal Aktif</div>
+            <div>
+                <h3 class="metric-value">{{ total_jadwal }}</h3>
+                <div class="small text-white-50"><i class="fa-solid fa-clock me-1"></i> Keberangkatan terjadwal</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Booking Card -->
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card card-booking">
+            <i class="fa-solid fa-receipt metric-icon"></i>
+            <div class="metric-label">Transaksi Hari Ini</div>
+            <div>
+                <h3 class="metric-value">{{ total_pemesanan_hari_ini }}</h3>
+                <div class="small text-white-50"><i class="fa-solid fa-arrow-up me-1"></i> Pemesanan tiket masuk</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Section - Quick Info & Recent Activity -->
+<div class="row g-4">
+    <!-- Recent Activity -->
+    <div class="col-lg-8">
+        <div class="recent-activity-card">
+            <h6 class="section-title">
+                <i class="fa-solid fa-circle-nodes text-primary"></i> Aktivitas Pemesanan Terbaru
+            </h6>
+            <ul class="activity-list">
+                {% if pemesanan_terbaru %}
+                    {% for pesan in pemesanan_terbaru %}
+                        <li class="activity-item">
+                            <div class="activity-icon bg-light-green">
+                                <i class="fa-solid fa-ticket-simple"></i>
+                            </div>
+                            <div class="activity-details">
+                                <p class="activity-title">Pemesanan Tiket Baru (Booking #{{ pesan.id_pemesanan }})</p>
+                                <p class="activity-desc">
+                                    Pelanggan <strong>{{ pesan.pelanggan.nama_pelanggan }}</strong> memesan {{ pesan.jumlah_tiket }} tiket untuk rute 
+                                    <strong>{{ pesan.tiket.jadwal.rute.kota_asal }} - {{ pesan.tiket.jadwal.rute.kota_tujuan }}</strong>.
+                                </p>
+                            </div>
+                            <span class="activity-time font-monospace text-secondary">{{ pesan.tanggal_pesan|date:"d M Y" }}</span>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="activity-item py-4 text-center justify-content-center">
+                        <div class="text-secondary small">
+                            <i class="fa-solid fa-receipt display-6 opacity-25 mb-2 d-block"></i>
+                            Belum ada riwayat aktivitas pemesanan baru.
+                        </div>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="col-lg-4">
+        <div class="recent-activity-card">
+            <h6 class="section-title">
+                <i class="fa-solid fa-bolt text-warning"></i> Pintasan Tindakan
+            </h6>
+            <div class="d-grid gap-2">
+                <a href="{% url 'bus_add' %}" class="btn btn-outline-primary text-start p-3 border-light-subtle bg-light-subtle rounded-3 transition">
+                    <i class="fa-solid fa-circle-plus me-2"></i> Tambah Armada Bus Baru
+                </a>
+                <a href="{% url 'rute_add' %}" class="btn btn-outline-success text-start p-3 border-light-subtle bg-light-subtle rounded-3 transition">
+                    <i class="fa-solid fa-route me-2"></i> Konfigurasi Rute Baru
+                </a>
+                <a href="{% url 'jadwal_add' %}" class="btn btn-outline-warning text-start p-3 border-light-subtle bg-light-subtle rounded-3 transition">
+                    <i class="fa-solid fa-calendar-plus me-2"></i> Atur Jadwal Keberangkatan
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateJamFuturistik() {
+        const sekarang = new Date();
+        const opsi = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Makassar' };
+        const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsi);
+        const elemenJam = document.getElementById('jam-digital-futuristik');
+        if (elemenJam) {
+            elemenJam.innerText = stringWaktu;
+        }
+    }
+    setInterval(updateJamFuturistik, 1000);
+    updateJamFuturistik();
+</script>
+{% endblock %}

@@ -1,0 +1,292 @@
+{% extends 'core/publik/base_public.html' %}
+
+{% block title %}Invoice Pembelian Tiket #{{ pemesanan.id_pemesanan }} - PO Gunung Mas{% endblock %}
+
+{% block extra_head %}
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ client_key }}"></script>
+{% endblock %}
+
+{% block content %}
+<style>
+    .invoice-wrapper {
+        max-width: 750px;
+        margin: 50px auto;
+        padding: 0 15px;
+    }
+
+    .ticket-container {
+        background-color: #ffffff;
+        border: 2px dashed #cbd5e1;
+        border-radius: 24px;
+        padding: 40px;
+        position: relative;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.02);
+    }
+
+    .ticket-header {
+        border-bottom: 2px dashed #e2e8f0;
+        padding-bottom: 25px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ticket-logo {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ticket-logo i {
+        background: linear-gradient(135deg, #6366f1, #d946ef);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .booking-number {
+        font-size: 14px;
+        color: #64748b;
+        text-align: right;
+    }
+
+    .booking-code {
+        font-size: 20px;
+        font-weight: 700;
+        color: #4f46e5;
+        letter-spacing: 1px;
+        font-family: monospace;
+    }
+
+    .status-badge-invoice {
+        font-size: 16px;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        display: inline-block;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border: 1px solid;
+    }
+
+    .status-unpaid {
+        background-color: #fffbeb;
+        color: #d97706;
+        border-color: #fef3c7;
+    }
+
+    .status-paid {
+        background-color: #f0fdf4;
+        color: #16a34a;
+        border-color: #dcfce7;
+    }
+
+    .section-title-invoice {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 5px;
+    }
+
+    .detail-item {
+        margin-bottom: 12px;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 14px;
+    }
+
+    /* Print styling rules */
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            background-color: #ffffff !important;
+        }
+        .invoice-wrapper {
+            margin: 0;
+            padding: 0;
+            max-width: 100%;
+        }
+        .ticket-container {
+            border: 2px solid #000000;
+            box-shadow: none !important;
+            padding: 20px;
+            border-radius: 0;
+        }
+    }
+</style>
+
+<div class="invoice-wrapper">
+    <!-- Top Action Bar (no-print) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <a href="{% url 'public_home' %}" class="btn btn-outline-secondary rounded-3">
+            <i class="fa-solid fa-house me-1"></i> Kembali ke Beranda
+        </a>
+        <button onclick="window.print();" class="btn btn-primary px-4 rounded-3 shadow-sm d-flex align-items-center gap-2">
+            <i class="fa-solid fa-print"></i> Cetak Tiket / Simpan PDF
+        </button>
+    </div>
+
+    <!-- Ticket Card -->
+    <div class="ticket-container">
+        
+        <!-- Header -->
+        <div class="ticket-header">
+            <div class="ticket-logo">
+                <i class="fa-solid fa-bus"></i>
+                <span>PO. GUNUNG MAS LOKET</span>
+            </div>
+            <div class="booking-number">
+                <span class="small d-block">NOMOR BOOKING</span>
+                <span class="booking-code">GM-{{ pemesanan.id_pemesanan|stringformat:"05d" }}</span>
+            </div>
+        </div>
+
+        <!-- Perjalanan & Status -->
+        <div class="row g-4 mb-4 align-items-center">
+            <div class="col-sm-8">
+                <div class="small text-secondary mb-1">RUTE PERJALANAN</div>
+                <h4 class="fw-bold text-dark mb-0">
+                    {{ pemesanan.tiket.jadwal.rute.kota_asal }} 
+                    <i class="fa-solid fa-arrow-right mx-2 text-muted" style="font-size: 18px;"></i> 
+                    {{ pemesanan.tiket.jadwal.rute.kota_tujuan }}
+                </h4>
+            </div>
+            <div class="col-sm-4 text-sm-end">
+                {% if pembayaran.status == 'Lunas' %}
+                    <span class="status-badge-invoice status-paid">
+                        <i class="fa-solid fa-circle-check me-1.5"></i> LUNAS
+                    </span>
+                {% else %}
+                    <span class="status-badge-invoice status-unpaid">
+                        <i class="fa-solid fa-circle-exclamation me-1.5"></i> {{ pembayaran.status|upper }}
+                    </span>
+                    {% if pembayaran.metode_bayar == 'Online' and pembayaran.status == 'Pending' %}
+                        <button id="pay-button" class="btn btn-primary w-100 mt-3 rounded-3 fw-bold no-print">
+                            <i class="fa-solid fa-wallet"></i> Bayar Sekarang
+                        </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Detail Jadwal & Bus -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="section-title-invoice">Detail Perjalanan & Armada</div>
+                <div class="row g-3">
+                    <div class="col-6 detail-item">
+                        <span class="detail-label d-block">Armada Bus</span>
+                        <span class="detail-value">{{ pemesanan.tiket.jadwal.bus.nama_bus }}</span>
+                    </div>
+                    <div class="col-6 detail-item">
+                        <span class="detail-label d-block">Kelas / Tipe</span>
+                        <span class="detail-value">{{ pemesanan.tiket.jadwal.bus.tipe_bus }}</span>
+                    </div>
+                    <div class="col-6 detail-item">
+                        <span class="detail-label d-block">Tanggal Keberangkatan</span>
+                        <span class="detail-value">{{ pemesanan.tiket.jadwal.tanggal_berangkat|date:"d M Y" }}</span>
+                    </div>
+                    <div class="col-6 detail-item">
+                        <span class="detail-label d-block">Jam Keberangkatan</span>
+                        <span class="detail-value text-primary">{{ pemesanan.tiket.jadwal.jam_berangkat|time:"H:i" }} WIB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Manifest Penumpang -->
+            <div class="col-md-6 border-start-md">
+                <div class="section-title-invoice">Manifest Penumpang</div>
+                <div class="row g-3">
+                    <div class="col-12 detail-item">
+                        <span class="detail-label d-block">Nama Lengkap</span>
+                        <span class="detail-value">{{ pemesanan.pelanggan.nama_pelanggan }}</span>
+                    </div>
+                    <div class="col-6 detail-item">
+                        <span class="detail-label d-block">Nomor Telepon</span>
+                        <span class="detail-value font-monospace">{{ pemesanan.pelanggan.nomor_telpon }}</span>
+                    </div>
+                    <div class="col-6 detail-item">
+                        <span class="detail-label d-block">Jenis Kelamin</span>
+                        <span class="detail-value">{{ pemesanan.pelanggan.jenis_kelamin }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Transaksi Keuangan -->
+        <div class="section-title-invoice">Rincian Transaksi Keuangan</div>
+        <div class="row g-3 mb-4">
+            <div class="col-3 detail-item">
+                <span class="detail-label d-block">Jumlah Tiket</span>
+                <span class="detail-value font-monospace">{{ pemesanan.jumlah_tiket }} Pcs</span>
+            </div>
+            <div class="col-3 detail-item">
+                <span class="detail-label d-block">Nomor Kursi</span>
+                <span class="detail-value font-monospace">
+                    {% if pemesanan.nomor_kursi %}
+                        {{ pemesanan.nomor_kursi }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-3 detail-item">
+                <span class="detail-label d-block">Metode Pembayaran</span>
+                <span class="detail-value">
+                    {% if pembayaran.metode_bayar == 'Cash' %}
+                        Cash / Tunai
+                    {% else %}
+                        Transfer Bank
+                    {% endif %}
+                </span>
+            </div>
+            <div class="col-3 detail-item text-end">
+                <span class="detail-label d-block">Total Pembayaran</span>
+                <span class="fs-5 fw-bold text-primary font-monospace">Rp {{ pembayaran.jumlah_bayar|floatformat:"0" }}</span>
+            </div>
+        </div>
+
+        <!-- Notes / Instructions -->
+        <div class="bg-light rounded-3 p-3 border text-secondary small" style="font-size: 12px;">
+            <h6 class="fw-bold text-dark mb-1" style="font-size: 13px;">Petunjuk Pembayaran & Tiket Masuk:</h6>
+            <ol class="mb-0 ps-3">
+                <li>Simpan bukti cetak invoice atau PDF e-tiket ini.</li>
+                <li>Lakukan transfer sesuai total pembayaran jika memilih metode Transfer, lalu hubungi loket PO Gunung Mas (+62 812-3456-7890) untuk validasi status Lunas.</li>
+                <li>Harap tiba di loket keberangkatan minimal 30 menit sebelum jadwal keberangkatan bus untuk melakukan boarding.</li>
+            </ol>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    var payButton = document.getElementById('pay-button');
+    if (payButton) {
+        payButton.addEventListener('click', function () {
+            snap.pay('{{ pembayaran.snap_token }}', {
+                onSuccess: function(result){ window.location.reload(); },
+                onPending: function(result){ window.location.reload(); },
+                onError: function(result){ alert("Pembayaran gagal!"); },
+                onClose: function(){ console.log('customer closed the popup without finishing the payment'); }
+            });
+        });
+    }
+</script>
+{% endblock %}

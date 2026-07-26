@@ -1,0 +1,135 @@
+{% extends 'core/base_dashboard.html' %}
+{% load humanize %}
+
+{% block title %}Kelola Catatan Pembayaran{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Daftar Status Pembayaran</h4>
+        <p class="text-secondary small mb-0">Kelola riwayat metode bayar, nominal uang masuk, dan status pelunasan transaksi tiket.</p>
+    </div>
+    <a href="{% url 'pembayaran_add' %}" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2">
+        <i class="fa-solid fa-file-invoice-dollar"></i> Buat Catatan Pembayaran
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                <thead class="table-light text-secondary font-monospace" style="font-size: 12px; letter-spacing: 0.5px;">
+                    <tr>
+                        <th class="py-3 ps-4" style="width: 80px;">NO</th>
+                        <th class="py-3">NAMA PELANGGAN</th>
+                        <th class="py-3">METODE PEMBAYARAN</th>
+                        <th class="py-3">NOMINAL BAYAR</th>
+                        <th class="py-3">BUKTI TRANSFER</th>
+                        <th class="py-3">STATUS</th>
+                        <th class="py-3 pe-4 text-center" style="width: 200px;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody class="text-dark" style="font-size: 14px;">
+                    {% if semua_pembayaran %}
+                        {% for p in semua_pembayaran %}
+                            <tr>
+                                <td class="ps-4 fw-semibold text-secondary">{{ forloop.counter }}</td>
+                                <td class="fw-bold">{{ p.pelanggan.nama_pelanggan }}</td>
+                                <td>
+                                    {% if p.metode_bayar == 'Cash' %}
+                                        <span class="badge bg-light text-dark border border-secondary-subtle px-2.5 py-1.5 fw-semibold font-monospace">
+                                            <i class="fa-solid fa-money-bill-wave text-success me-1"></i> Cash / Tunai
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark border border-secondary-subtle px-2.5 py-1.5 fw-semibold font-monospace">
+                                            <i class="fa-solid fa-building-columns text-primary me-1"></i> Transfer Bank
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold font-monospace">Rp {{ p.jumlah_bayar|intcomma }}</td>
+                                <td>
+                                    {% if p.bukti_bayar %}
+                                        <a href="{{ p.bukti_bayar.url }}" target="_blank" class="btn btn-sm btn-outline-info px-2 py-1 rounded-2 fw-semibold" style="font-size: 12px;">
+                                            <i class="fa-solid fa-image me-1"></i> Lihat Bukti
+                                        </a>
+                                    {% else %}
+                                        <span class="text-secondary small font-monospace">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if p.status == 'Lunas' %}
+                                        <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2 border border-success-subtle fw-semibold">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Lunas
+                                        </span>
+                                    {% else %}
+                                        <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-2 border border-warning-subtle fw-semibold">
+                                            <i class="fa-solid fa-clock-rotate-left me-1"></i> Belum Lunas
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{% url 'pembayaran_edit' p.id_pembayaran %}" class="btn btn-sm btn-outline-warning px-3 rounded-2 d-flex align-items-center gap-1.5" style="font-size: 13px;">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        
+                                        <!-- Form Delete dengan perlindungan CSRF -->
+                                        <form action="{% url 'pembayaran_delete' p.id_pembayaran %}" method="POST" class="delete-form d-inline-block">
+                                            {% csrf_token %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger px-3 rounded-2 delete-btn d-flex align-items-center gap-1.5" style="font-size: 13px;" data-name="Pembayaran Rp {{ p.jumlah_bayar|intcomma }} oleh {{ p.pelanggan.nama_pelanggan }}">
+                                                <i class="fa-solid fa-trash-can"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-secondary mb-3">
+                                    <i class="fa-solid fa-credit-card display-4 opacity-25"></i>
+                                </div>
+                                <h6 class="fw-semibold text-secondary">Belum ada catatan pembayaran terdaftar</h6>
+                                <p class="text-muted small mb-0">Klik tombol "Buat Catatan Pembayaran" di atas untuk mendaftarkan pembayaran pertama Anda.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript untuk konfirmasi hapus SweetAlert2 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                const name = this.getAttribute('data-name');
+                
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    html: `Apakah Anda yakin ingin menghapus data <strong>${name}</strong>? Tindakan ini tidak dapat dibatalkan.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    background: '#ffffff',
+                    color: '#1e293b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

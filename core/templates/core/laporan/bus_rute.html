@@ -1,0 +1,74 @@
+{% extends 'core/laporan/laporan_base.html' %}
+
+{% block report_page_title %}Laporan Bus & Rute{% endblock %}
+
+{% block report_icon %}<i class="fa-solid fa-bus text-success me-2"></i>{% endblock %}
+{% block report_title %}Laporan Inventaris Armada & Distribusi Rute{% endblock %}
+{% block report_subtitle %}Tinjau rincian tipe armada bus PO Gunung Mas beserta kapasitas dan nomor plat polisi.{% endblock %}
+
+{% block unduh_url %}{% url 'laporan_unduh_pdf' 'bus_rute' %}{% endblock %}
+
+{% block filter_fields %}
+<div class="col-md-10">
+    <label for="tipe_bus" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Tipe / Kelas Bus</label>
+    <select name="tipe_bus" id="tipe_bus" class="form-select">
+        <option value="">Semua Tipe Bus</option>
+        <option value="Lux" {% if tipe_bus == 'Lux' %}selected{% endif %}>Lux</option>
+        <option value="Premium" {% if tipe_bus == 'Premium' %}selected{% endif %}>Premium</option>
+        <option value="Std" {% if tipe_bus == 'Std' %}selected{% endif %}>Std</option>
+    </select>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+        <thead class="table-light text-secondary font-monospace" style="font-size: 12px; letter-spacing: 0.5px;">
+            <tr>
+                <th class="py-3 ps-4" style="width: 80px;">NO</th>
+                <th class="py-3">NAMA ARMADA BUS</th>
+                <th class="py-3">TIPE / KELAS</th>
+                <th class="py-3">PLAT NOMOR POLISI</th>
+                <th class="py-3">KAPASITAS KURSI</th>
+                <th class="py-3 pe-4">SOPIR</th>
+            </tr>
+        </thead>
+        <tbody class="text-dark" style="font-size: 14px;">
+            {% if data %}
+                {% for b in data %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-secondary">{{ forloop.counter }}</td>
+                        <td class="fw-bold text-dark">
+                            {% if b.foto %}
+                                <img src="{{ b.foto.url }}" alt="{{ b.nama_bus }}" class="rounded me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                            {% endif %}
+                            {{ b.nama_bus }}
+                        </td>
+                        <td>
+                            {% if b.tipe_bus == 'Lux' %}
+                                <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1.5 fw-semibold"><i class="fa-solid fa-crown me-1"></i> Lux</span>
+                            {% elif b.tipe_bus == 'Premium' %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 fw-semibold"><i class="fa-solid fa-star me-1"></i> Premium</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1.5 fw-semibold"><i class="fa-solid fa-bus me-1"></i> Std</span>
+                            {% endif %}
+                        </td>
+                        <td class="font-monospace fw-bold text-secondary">{{ b.nomor_polisi }}</td>
+                        <td class="fw-semibold text-secondary">{{ b.kapasitas }} Penumpang</td>
+                        <td class="pe-4 fw-semibold text-secondary">{{ b.sopir.nama_sopir|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="text-secondary mb-3">
+                            <i class="fa-solid fa-bus display-4 opacity-25"></i>
+                        </div>
+                        <h6 class="fw-semibold text-secondary">Tidak ada data armada bus ditemukan</h6>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

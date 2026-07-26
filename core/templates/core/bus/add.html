@@ -1,0 +1,96 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Tambah Bus Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'bus_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Bus
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Tambah Bus Baru</h4>
+    <p class="text-secondary small mb-0">Masukkan informasi spesifikasi teknis dan tipe dari armada bus baru.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Pendaftaran Armada</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'bus_add' %}" method="POST" enctype="multipart/form-data" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Nama Bus -->
+                    <div class="mb-4">
+                        <label for="nama_bus" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nama Bus</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-bus"></i></span>
+                            <input type="text" name="nama_bus" id="nama_bus" class="form-control border-start-0 ps-1" placeholder="Contoh: Gunung Mas 01" required>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Gunakan nama unit identitas yang unik untuk setiap bus.</div>
+                    </div>
+                    
+                    <!-- Nomor Polisi -->
+                    <div class="mb-4">
+                        <label for="nomor_polisi" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nomor Polisi (Plat Nomor)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-id-card"></i></span>
+                            <input type="text" name="nomor_polisi" id="nomor_polisi" class="form-control border-start-0 ps-1 text-uppercase" placeholder="Contoh: EB 1234 GM" required>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Gunakan format plat nomor polisi resmi kendaraan.</div>
+                    </div>
+                    
+                    <!-- Tipe Bus -->
+                    <div class="mb-4">
+                        <label for="tipe_bus" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Tipe Kelas Bus</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-layer-group"></i></span>
+                            <select name="tipe_bus" id="tipe_bus" class="form-select border-start-0 ps-1" required>
+                                <option value="" disabled selected>Pilih kelas bus...</option>
+                                <option value="Lux">Lux (Kapasitas: 8 Kursi)</option>
+                                <option value="Premium">Premium (Kapasitas: 8 Kursi)</option>
+                                <option value="Std">Std (Kapasitas: 10 Kursi)</option>
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Kapasitas kursi penumpang akan disesuaikan secara otomatis berdasarkan pilihan tipe kelas.</div>
+                    </div>
+
+                    <!-- Foto Bus -->
+                    <div class="mb-4">
+                        <label for="foto" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Foto Bus (Opsional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-image"></i></span>
+                            <input type="file" name="foto" id="foto" class="form-control border-start-0 ps-1" accept="image/*">
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Format yang didukung: JPG, PNG, WEBP.</div>
+                    </div>
+
+                    <!-- Sopir Bus -->
+                    <div class="mb-4">
+                        <label for="id_sopir" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Sopir (Opsional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-id-card"></i></span>
+                            <select name="id_sopir" id="id_sopir" class="form-control border-start-0 ps-1">
+                                <option value="">-- Tanpa Sopir --</option>
+                                {% for sopir in sopir_tersedia %}
+                                    <option value="{{ sopir.id_sopir }}">{{ sopir.nama_sopir }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Pilih sopir yang akan memegang armada bus ini.</div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'bus_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Bus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Ubah Data Catatan Pembayaran{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'pembayaran_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Pembayaran
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Ubah Informasi Pembayaran</h4>
+    <p class="text-secondary small mb-0">Ubah detail transaksi metode bayar, nominal uang masuk, atau status pelunasan terdaftar.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Update Pembayaran #{{ pembayaran.id_pembayaran }}</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'pembayaran_edit' pembayaran.id_pembayaran %}" method="POST" enctype="multipart/form-data" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Pilih Pelanggan -->
+                    <div class="mb-4">
+                        <label for="id_pelanggan" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Pelanggan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-user"></i></span>
+                            <select name="id_pelanggan" id="id_pelanggan" class="form-select border-start-0 ps-1" required>
+                                {% for p in list_pelanggan %}
+                                    <option value="{{ p.id_pelanggan }}" {% if p.id_pelanggan == pembayaran.pelanggan.id_pelanggan %}selected{% endif %}>
+                                        {{ p.nama_pelanggan }} (Telp: {{ p.nomor_telpon }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Metode Bayar -->
+                    <div class="mb-4">
+                        <label for="metode_bayar" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Metode Pembayaran</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-credit-card"></i></span>
+                            <select name="metode_bayar" id="metode_bayar" class="form-select border-start-0 ps-1" required>
+                                <option value="Cash" {% if pembayaran.metode_bayar == 'Cash' %}selected{% endif %}>Cash / Tunai</option>
+                                <option value="Transfer" {% if pembayaran.metode_bayar == 'Transfer' %}selected{% endif %}>Transfer Bank</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Jumlah Bayar -->
+                    <div class="mb-4">
+                        <label for="jumlah_bayar" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nominal Jumlah Bayar</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0 fw-bold" style="font-size: 13px;">Rp</span>
+                            <input type="number" name="jumlah_bayar" id="jumlah_bayar" class="form-control border-start-0 ps-1 font-monospace" value="{{ pembayaran.jumlah_bayar|floatformat:'0' }}" placeholder="Contoh: 180000" min="0" required>
+                        </div>
+                    </div>
+
+                    <!-- Bukti Transfer (Unggah/Ganti) -->
+                    <div class="mb-4">
+                        <label for="bukti_bayar" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Unggah / Ganti Bukti Transfer</label>
+                        <input type="file" name="bukti_bayar" id="bukti_bayar" class="form-control" accept="image/*">
+                    </div>
+
+                    <!-- Bukti Transfer Preview (Jika Ada) -->
+                    {% if pembayaran.bukti_bayar %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary" style="font-size: 13px;">Bukti Pembayaran Saat Ini</label>
+                        <div class="border rounded p-2 text-center bg-light">
+                            <img src="{{ pembayaran.bukti_bayar.url }}" alt="Bukti Transfer" class="img-fluid rounded border shadow-sm" style="max-height: 250px;">
+                            <div class="mt-2">
+                                <a href="{{ pembayaran.bukti_bayar.url }}" target="_blank" class="btn btn-sm btn-outline-primary py-1 px-2.5 rounded-2" style="font-size: 11px;">
+                                    <i class="fa-solid fa-expand"></i> Buka Gambar Penuh
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <label for="status" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Status Pembayaran</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-toggle-on"></i></span>
+                            <select name="status" id="status" class="form-select border-start-0 ps-1" required>
+                                <option value="Lunas" {% if pembayaran.status == 'Lunas' %}selected{% endif %}>Lunas</option>
+                                <option value="Belum Lunas" {% if pembayaran.status == 'Belum Lunas' %}selected{% endif %}>Belum Lunas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'pembayaran_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

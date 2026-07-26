@@ -1,0 +1,78 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Buat Pemesanan Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'pemesanan_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Pemesanan
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Buat Pemesanan Baru</h4>
+    <p class="text-secondary small mb-0">Catat pemesanan tiket baru dengan memilih pelanggan terdaftar dan tiket jadwal bus aktif.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Pemesanan Tiket</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'pemesanan_add' %}" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Pilih Pelanggan -->
+                    <div class="mb-4">
+                        <label for="id_pelanggan" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Pelanggan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-users"></i></span>
+                            <select name="id_pelanggan" id="id_pelanggan" class="form-select border-start-0 ps-1" required>
+                                <option value="" disabled selected>Pilih Pelanggan...</option>
+                                {% for p in list_pelanggan %}
+                                    <option value="{{ p.id_pelanggan }}">{{ p.nama_pelanggan }} (Telp: {{ p.nomor_telpon }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Pilih Tiket -->
+                    <div class="mb-4">
+                        <label for="id_tiket" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Tiket Jadwal Aktif</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-ticket"></i></span>
+                            <select name="id_tiket" id="id_tiket" class="form-select border-start-0 ps-1" required>
+                                <option value="" disabled selected>Pilih Tiket Perjalanan...</option>
+                                {% for t in list_tiket %}
+                                    {% if t.status == 'Tersedia' %}
+                                        <option value="{{ t.id_tiket }}">
+                                            {{ t.jadwal.rute.kota_asal }} - {{ t.jadwal.rute.kota_tujuan }} | Rp {{ t.harga_tiket|floatformat:'0' }} | {{ t.jadwal.tanggal_berangkat|date:"d M Y" }} (Bus: {{ t.jadwal.bus.nama_bus }})
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Hanya menampilkan tiket perjalanan yang berstatus "Tersedia".</div>
+                    </div>
+                    
+                    <!-- Jumlah Tiket -->
+                    <div class="mb-4">
+                        <label for="jumlah_tiket" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Jumlah Kursi/Tiket</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-calculator"></i></span>
+                            <input type="number" name="jumlah_tiket" id="jumlah_tiket" class="form-control border-start-0 ps-1 font-monospace" value="1" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'pemesanan_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Pemesanan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

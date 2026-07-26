@@ -1,0 +1,114 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Kelola Rute Perjalanan{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Daftar Rute Perjalanan</h4>
+        <p class="text-secondary small mb-0">Kelola rute, kota asal, kota tujuan, dan jarak operasional bus.</p>
+    </div>
+    <a href="{% url 'rute_add' %}" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Tambah Rute Baru
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                <thead class="table-light text-secondary font-monospace" style="font-size: 12px; letter-spacing: 0.5px;">
+                    <tr>
+                        <th class="py-3 ps-4" style="width: 80px;">NO</th>
+                        <th class="py-3">KOTA ASAL</th>
+                        <th class="py-3">KOTA TUJUAN</th>
+                        <th class="py-3">JARAK OPERASIONAL</th>
+                        <th class="py-3 pe-4 text-center" style="width: 200px;">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody class="text-dark" style="font-size: 14px;">
+                    {% if semua_rute %}
+                        {% for rute in semua_rute %}
+                            <tr>
+                                <td class="ps-4 fw-semibold text-secondary">{{ forloop.counter }}</td>
+                                <td class="fw-bold text-primary">
+                                    <i class="fa-solid fa-circle-dot me-1.5 text-secondary" style="font-size: 11px;"></i> {{ rute.kota_asal }}
+                                </td>
+                                <td class="fw-bold text-success">
+                                    <i class="fa-solid fa-location-dot me-1.5 text-secondary" style="font-size: 11px;"></i> {{ rute.kota_tujuan }}
+                                </td>
+                                <td>
+                                    {% if rute.jarak %}
+                                        <span class="badge bg-light text-dark border border-secondary-subtle px-2.5 py-1.5 font-monospace fs-13">
+                                            <i class="fa-solid fa-road me-1 text-muted"></i> {{ rute.jarak }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted font-italic">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{% url 'rute_edit' rute.id_rute %}" class="btn btn-sm btn-outline-warning px-3 rounded-2 d-flex align-items-center gap-1.5" style="font-size: 13px;">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        
+                                        <!-- Form Delete dengan perlindungan CSRF -->
+                                        <form action="{% url 'rute_delete' rute.id_rute %}" method="POST" class="delete-form d-inline-block">
+                                            {% csrf_token %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger px-3 rounded-2 delete-btn d-flex align-items-center gap-1.5" style="font-size: 13px;" data-name="{{ rute.kota_asal }} - {{ rute.kota_tujuan }}">
+                                                <i class="fa-solid fa-trash-can"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-secondary mb-3">
+                                    <i class="fa-solid fa-route display-4 opacity-25"></i>
+                                </div>
+                                <h6 class="fw-semibold text-secondary">Belum ada rute perjalanan terdaftar</h6>
+                                <p class="text-muted small mb-0">Klik tombol "Tambah Rute Baru" di atas untuk menambahkan rute pertama Anda.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript untuk konfirmasi hapus SweetAlert2 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                const ruteName = this.getAttribute('data-name');
+                
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    html: `Apakah Anda yakin ingin menghapus rute perjalanan <strong>${ruteName}</strong>? Tindakan ini tidak dapat dibatalkan.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    background: '#ffffff',
+                    color: '#1e293b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

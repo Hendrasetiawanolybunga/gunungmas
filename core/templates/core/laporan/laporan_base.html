@@ -1,0 +1,77 @@
+{% extends 'core/base_dashboard.html' %}
+{% load humanize %}
+
+{% block title %}{% block report_page_title %}Laporan{% endblock %} - PO Gunung Mas{% endblock %}
+
+{% block content %}
+<style>
+    .report-card {
+        background-color: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        animation: fadeInUpLaporan 0.5s ease-out forwards;
+    }
+    .filter-card {
+        background-color: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        animation: fadeInUpLaporan 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeInUpLaporan {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">{% block report_icon %}{% endblock %} {% block report_title %}Laporan Sistem{% endblock %}</h4>
+        <p class="text-secondary small mb-0">{% block report_subtitle %}Preview data laporan resmi dan ekspor ke dokumen PDF.{% endblock %}</p>
+    </div>
+    
+    <div>
+        <a id="btnUnduhPDF" href="#" class="btn btn-danger px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-semibold">
+            <i class="fa-solid fa-file-pdf"></i> Unduh PDF Resmi
+        </a>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card filter-card border-0 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="" id="filterForm" class="row align-items-end g-3">
+            {% block filter_fields %}
+            {% endblock %}
+            <div class="col-md-2 col-lg-1.5 d-grid">
+                <button type="submit" class="btn btn-primary rounded-3 py-2">
+                    <i class="fa-solid fa-filter me-1"></i> Filter
+                </button>
+            </div>
+            <div class="col-md-2 col-lg-1.5 d-grid">
+                <a href="." class="btn btn-outline-secondary rounded-3 py-2">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table Card -->
+<div class="card report-card border-0 overflow-hidden">
+    <div class="card-body p-0">
+        {% block report_table %}
+        {% endblock %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentUrlParams = new URLSearchParams(window.location.search);
+        const unduhLink = document.getElementById('btnUnduhPDF');
+        if (unduhLink) {
+            unduhLink.href = "{% block unduh_url %}{% endblock %}?" + currentUrlParams.toString();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Terbitkan Tiket Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'tiket_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Tiket
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Terbitkan Tiket Baru</h4>
+    <p class="text-secondary small mb-0">Hubungkan tiket baru dengan jadwal aktif, tetapkan nominal harga, serta kelola status ketersediaannya.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Penerbitan Tiket</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'tiket_add' %}" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Pilih Jadwal -->
+                    <div class="mb-4">
+                        <label for="id_jadwal" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Jadwal Keberangkatan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-calendar-day"></i></span>
+                            <select name="id_jadwal" id="id_jadwal" class="form-select border-start-0 ps-1" required>
+                                <option value="" disabled selected>Pilih Jadwal...</option>
+                                {% for j in list_jadwal %}
+                                    <option value="{{ j.id_jadwal }}">
+                                        {{ j.rute.kota_asal }} - {{ j.rute.kota_tujuan }} | {{ j.tanggal_berangkat|date:"d M Y" }} ({{ j.jam_berangkat|time:"H:i" }} WIB) | Bus: {{ j.bus.nama_bus }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Hubungkan tiket dengan rute dan jadwal keberangkatan aktif.</div>
+                    </div>
+                    
+                    <!-- Harga Tiket -->
+                    <div class="mb-4">
+                        <label for="harga_tiket" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Harga Tiket (Rupiah)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0 fw-bold" style="font-size: 13px;">Rp</span>
+                            <input type="number" name="harga_tiket" id="harga_tiket" class="form-control border-start-0 ps-1 font-monospace" placeholder="Contoh: 180000" min="0" required>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Tuliskan nominal angka saja tanpa titik atau koma.</div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <label for="status" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Status Ketersediaan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-toggle-on"></i></span>
+                            <select name="status" id="status" class="form-select border-start-0 ps-1" required>
+                                <option value="Tersedia" selected>Tersedia</option>
+                                <option value="Habis">Habis</option>
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Ubah ketersediaan menjadi Habis jika alokasi kursi terpenuhi.</div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'tiket_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Terbitkan Tiket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

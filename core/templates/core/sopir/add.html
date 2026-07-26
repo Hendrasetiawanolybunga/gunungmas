@@ -1,0 +1,75 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Tambah Sopir Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'sopir_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Sopir
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Tambah Sopir Baru</h4>
+    <p class="text-secondary small mb-0">Masukkan informasi pribadi dan lisensi dari pengemudi baru.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Pendaftaran Sopir</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'sopir_add' %}" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Nama Sopir -->
+                    <div class="mb-4">
+                        <label for="nama_sopir" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nama Lengkap Sopir</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" name="nama_sopir" id="nama_sopir" class="form-control border-start-0 ps-1" placeholder="Contoh: Budi Santoso" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Nomor Lisensi -->
+                    <div class="mb-4">
+                        <label for="nomor_lisensi" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nomor Lisensi (SIM)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-id-badge"></i></span>
+                            <input type="text" name="nomor_lisensi" id="nomor_lisensi" class="form-control border-start-0 ps-1" placeholder="Contoh: 1234567890" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Nomor Telepon -->
+                    <div class="mb-4">
+                        <label for="nomor_telepon" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nomor Telepon</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-phone"></i></span>
+                            <input type="text" name="nomor_telepon" id="nomor_telepon" class="form-control border-start-0 ps-1" placeholder="Contoh: 08123456789" required>
+                        </div>
+                    </div>
+
+                    <!-- Status Tugas -->
+                    <div class="mb-4">
+                        <label for="status_tugas" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Status Penugasan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-info-circle"></i></span>
+                            <select name="status_tugas" id="status_tugas" class="form-select border-start-0 ps-1" required>
+                                <option value="Tersedia" selected>Tersedia</option>
+                                <option value="Bertugas">Bertugas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'sopir_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Sopir
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

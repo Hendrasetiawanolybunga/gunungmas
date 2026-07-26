@@ -1,0 +1,376 @@
+{% extends 'core/publik/base_public.html' %}
+{% load humanize %}
+
+{% block title %}Pemesanan Tiket Online - PO Gunung Mas{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+        padding: 100px 0 140px 0;
+        color: #ffffff;
+        position: relative;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+        top: -50px;
+        left: -50px;
+        border-radius: 50%;
+    }
+
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%);
+        bottom: -100px;
+        right: -100px;
+        border-radius: 50%;
+    }
+
+    .hero-title {
+        font-weight: 800;
+        font-size: 38px;
+        letter-spacing: -0.5px;
+        background: linear-gradient(to right, #ffffff, #cbd5e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 15px;
+    }
+
+    .hero-desc {
+        font-size: 16px;
+        color: #94a3b8;
+        max-width: 650px;
+        margin: 0 auto 30px auto;
+    }
+
+    .search-card-container {
+        margin-top: -80px;
+        position: relative;
+        z-index: 10;
+        padding-bottom: 80px;
+    }
+
+    .search-card {
+        background-color: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 35px;
+    }
+
+    .form-label-custom {
+        font-weight: 600;
+        font-size: 13px;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    .select-custom, .input-custom {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        color: #1e293b;
+        transition: all 0.3s ease;
+    }
+
+    .select-custom:focus, .input-custom:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    .btn-search {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        border: none;
+        color: white;
+        padding: 14px 28px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 12px;
+        width: 100%;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-search:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+    }
+
+    .features-section {
+        padding: 0 0 80px 0;
+    }
+
+    .feature-box {
+        background-color: #ffffff;
+        border-radius: 20px;
+        padding: 30px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin: 0 auto 20px auto;
+    }
+
+    .icon-blue { background-color: #eff6ff; color: #3b82f6; }
+    .icon-green { background-color: #ecfdf5; color: #10b981; }
+    .icon-orange { background-color: #fffbeb; color: #f59e0b; }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">Cari & Pesan Tiket Bus Gunung Mas</h1>
+        <p class="hero-desc">
+            Nikmati kemudahan memesan tiket bus antarkota di Flores secara instan tanpa perlu masuk/login. Cukup pilih jadwal, isi data manifest, dan dapatkan tiket Anda langsung.
+        </p>
+    </div>
+</section>
+
+<!-- Search Form Card Section -->
+<section class="search-card-container" id="cari">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="search-card">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fa-solid fa-route text-primary me-2"></i> Cari Jadwal Perjalanan</h5>
+                    <form action="{% url 'public_search' %}" method="GET">
+                        <div class="row g-3 align-items-end">
+                            <!-- Kota Asal -->
+                            <div class="col-md-4">
+                                <label for="asal" class="form-label form-label-custom">Kota Asal</label>
+                                <select name="asal" id="asal" class="form-select select-custom" required>
+                                    <option value="" disabled selected>Pilih asal keberangkatan...</option>
+                                    {% for asal in list_asal %}
+                                        <option value="{{ asal }}">{{ asal }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Kota Tujuan -->
+                            <div class="col-md-4">
+                                <label for="tujuan" class="form-label form-label-custom">Kota Tujuan</label>
+                                <select name="tujuan" id="tujuan" class="form-select select-custom" required>
+                                    <option value="" disabled selected>Pilih kota tujuan...</option>
+                                    {% for tujuan in list_tujuan %}
+                                        <option value="{{ tujuan }}">{{ tujuan }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Tanggal Berangkat -->
+                            <div class="col-md-4 col-lg-3">
+                                <label for="tanggal" class="form-label form-label-custom">Tanggal Perjalanan</label>
+                                <input type="date" name="tanggal" id="tanggal" class="form-control input-custom" required>
+                            </div>
+                            
+                            <!-- Tombol Cari -->
+                            <div class="col-lg-1 d-grid">
+                                <button type="submit" class="btn-search d-flex align-items-center justify-content-center">
+                                    <i class="fa-solid fa-arrow-right fs-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</section>
+
+<!-- Section 1: Armada Modern Kami -->
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h3 class="fw-bold text-dark">Armada Modern Kami</h3>
+            <p class="text-secondary small">Armada bus andalan kami siap mengantar perjalanan Anda dengan nyaman.</p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% if daftar_bus %}
+                {% for bus in daftar_bus %}
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                            {% if bus.foto %}
+                                <img src="{{ bus.foto.url }}" class="card-img-top" alt="{{ bus.nama_bus }}" data-bs-toggle="modal" data-bs-target="#modalBus{{ bus.id_bus }}" style="height: 200px; object-fit: cover; cursor: pointer;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center text-secondary" style="height: 200px;">
+                                    <i class="fa-solid fa-bus display-4 opacity-50"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="card-title fw-bold text-dark mb-0">{{ bus.nama_bus }}</h5>
+                                    {% if bus.tipe_bus == 'Lux' %}
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1.5 fw-semibold"><i class="fa-solid fa-crown me-1"></i> Lux</span>
+                                    {% elif bus.tipe_bus == 'Premium' %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 fw-semibold"><i class="fa-solid fa-star me-1"></i> Premium</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1.5 fw-semibold"><i class="fa-solid fa-bus me-1"></i> Std</span>
+                                    {% endif %}
+                                </div>
+                                <p class="card-text text-secondary small mb-0"><i class="fa-solid fa-credit-card me-1 text-muted"></i> Plat: <span class="font-monospace fw-semibold">{{ bus.nomor_polisi }}</span></p>
+                                <p class="card-text text-secondary small"><i class="fa-solid fa-users me-1 text-muted"></i> Kapasitas: {{ bus.kapasitas }} Penumpang</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Preview Foto Bus -->
+                    <div class="modal fade" id="modalBus{{ bus.id_bus }}" tabindex="-1" aria-labelledby="modalBusLabel{{ bus.id_bus }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
+                                <div class="modal-header border-0 bg-dark text-white py-3">
+                                    <h5 class="modal-title fw-bold" id="modalBusLabel{{ bus.id_bus }}"><i class="fa-solid fa-bus text-primary me-2"></i> {{ bus.nama_bus }}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-0 text-center bg-black">
+                                    {% if bus.foto %}
+                                        <img src="{{ bus.foto.url }}" class="img-fluid" alt="{{ bus.nama_bus }}" style="max-height: 80vh; width: 100%; object-fit: contain;">
+                                    {% else %}
+                                        <div class="bg-dark text-secondary py-5">
+                                            <i class="fa-solid fa-bus display-1 opacity-25"></i>
+                                            <p class="mt-2 mb-0">Belum ada foto untuk armada ini.</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer bg-light border-0 py-3">
+                                    <div class="me-auto text-secondary small">
+                                        Nomor Polisi: <strong>{{ bus.nomor_polisi }}</strong> | Kapasitas: <strong>{{ bus.kapasitas }} Penumpang</strong>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-4">
+                    <p class="text-secondary small">Belum ada data armada bus.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Jadwal & Tiket Tersedia Saat Ini -->
+<section class="py-5 bg-light-subtle">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h3 class="fw-bold text-dark">Jadwal & Tiket Tersedia Saat Ini</h3>
+            <p class="text-secondary small">Temukan rute perjalanan terpopuler PO Gunung Mas di Flores.</p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% if daftar_tiket %}
+                {% for tiket in daftar_tiket %}
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid #e2e8f0 !important;">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge bg-light text-secondary border border-secondary-subtle font-monospace px-2 py-1">
+                                        <i class="fa-regular fa-calendar me-1"></i> {{ tiket.jadwal.tanggal_berangkat|date:"d M Y" }}
+                                    </span>
+                                    <span class="badge bg-secondary-subtle text-secondary px-2 py-1 font-monospace">
+                                        {{ tiket.jadwal.jam_berangkat|time:"H:i" }} WIB
+                                    </span>
+                                </div>
+                                
+                                <h5 class="fw-bold text-dark mb-1">
+                                    {{ tiket.jadwal.rute.kota_asal }} <i class="fa-solid fa-arrow-right mx-1 text-muted" style="font-size: 13px;"></i> {{ tiket.jadwal.rute.kota_tujuan }}
+                                </h5>
+                                <div class="text-secondary small mb-3">
+                                    <i class="fa-solid fa-bus me-1 text-muted"></i> {{ tiket.jadwal.bus.nama_bus }} ({{ tiket.jadwal.bus.tipe_bus }})
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                    <div>
+                                        <span class="text-secondary small d-block">Harga Tiket</span>
+                                        <span class="fw-bold text-primary font-monospace fs-5">Rp {{ tiket.harga_tiket|intcomma }}</span>
+                                    </div>
+                                    <a href="{% url 'public_checkout' tiket.id_tiket %}" class="btn btn-primary rounded-3 px-3 py-2 fw-semibold d-flex align-items-center gap-1.5" style="font-size: 13px;">
+                                        <i class="fa-solid fa-cart-shopping"></i> Pesan Tiket
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-4">
+                    <p class="text-secondary small">Belum ada jadwal keberangkatan aktif yang tersedia.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon icon-blue">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Instan Tanpa Login</h6>
+                    <p class="small text-secondary mb-0">Pesan tiket dengan cepat tanpa perlu registrasi akun atau login terlebih dahulu.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon icon-green">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Pasti & Aman</h6>
+                    <p class="small text-secondary mb-0">E-Tiket diterbitkan resmi oleh PO Gunung Mas dan terkoneksi langsung dengan sistem agen.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon icon-orange">
+                        <i class="fa-solid fa-money-bill-transfer"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Metode Bayar Fleksibel</h6>
+                    <p class="small text-secondary mb-0">Bayar tiket secara fleksibel lewat Transfer Bank atau bayar Cash di loket resmi kami.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mengatur minimal tanggal hari ini di input date -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('tanggal');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+    });
+</script>
+{% endblock %}

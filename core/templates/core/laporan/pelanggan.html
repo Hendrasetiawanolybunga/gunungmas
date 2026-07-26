@@ -1,0 +1,65 @@
+{% extends 'core/laporan/laporan_base.html' %}
+
+{% block report_page_title %}Laporan Pelanggan{% endblock %}
+
+{% block report_icon %}<i class="fa-solid fa-users-gear text-primary me-2"></i>{% endblock %}
+{% block report_title %}Laporan Data Manifest Pelanggan{% endblock %}
+{% block report_subtitle %}Tinjau dan kelola data kependudukan manifest pelanggan terdaftar.{% endblock %}
+
+{% block unduh_url %}{% url 'laporan_unduh_pdf' 'pelanggan' %}{% endblock %}
+
+{% block filter_fields %}
+<div class="col-md-5">
+    <label for="keyword_nama" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Cari Nama Pelanggan</label>
+    <input type="text" name="keyword_nama" id="keyword_nama" class="form-control" placeholder="Ketik nama pelanggan..." value="{{ keyword_nama|default:'' }}">
+</div>
+<div class="col-md-5">
+    <label for="jenis_kelamin" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Jenis Kelamin</label>
+    <select name="jenis_kelamin" id="jenis_kelamin" class="form-select">
+        <option value="">Semua Jenis Kelamin</option>
+        <option value="Laki-laki" {% if jenis_kelamin == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+        <option value="Perempuan" {% if jenis_kelamin == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+    </select>
+</div>
+{% endblock %}
+
+{% block report_table %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+        <thead class="table-light text-secondary font-monospace" style="font-size: 12px; letter-spacing: 0.5px;">
+            <tr>
+                <th class="py-3 ps-4" style="width: 80px;">NO</th>
+                <th class="py-3">NAMA PELANGGAN</th>
+                <th class="py-3">JENIS KELAMIN</th>
+                <th class="py-3">NO. TELEPON</th>
+                <th class="py-3">ALAMAT LENGKAP</th>
+                <th class="py-3 pe-4">EMAIL</th>
+            </tr>
+        </thead>
+        <tbody class="text-dark" style="font-size: 14px;">
+            {% if data %}
+                {% for p in data %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-secondary">{{ forloop.counter }}</td>
+                        <td class="fw-bold text-dark">{{ p.nama_pelanggan }}</td>
+                        <td>{{ p.jenis_kelamin }}</td>
+                        <td class="font-monospace">{{ p.nomor_telpon }}</td>
+                        <td>{{ p.alamat }}</td>
+                        <td>{{ p.email|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="text-secondary mb-3">
+                            <i class="fa-solid fa-users display-4 opacity-25"></i>
+                        </div>
+                        <h6 class="fw-semibold text-secondary">Tidak ada data pelanggan ditemukan</h6>
+                        <p class="text-muted small mb-0">Coba sesuaikan kata kunci filter pencarian Anda.</p>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

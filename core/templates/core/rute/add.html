@@ -1,0 +1,66 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Tambah Rute Perjalanan Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'rute_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Rute
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Tambah Rute Perjalanan Baru</h4>
+    <p class="text-secondary small mb-0">Masukkan informasi kota asal, tujuan, serta estimasi jarak lintasan perjalanan.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Pendaftaran Rute</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'rute_add' %}" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Kota Asal -->
+                    <div class="mb-4">
+                        <label for="kota_asal" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Kota Asal</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-circle-dot text-primary"></i></span>
+                            <input type="text" name="kota_asal" id="kota_asal" class="form-control border-start-0 ps-1" placeholder="Contoh: Ruteng" required>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Kota/terminal awal titik keberangkatan bus.</div>
+                    </div>
+                    
+                    <!-- Kota Tujuan -->
+                    <div class="mb-4">
+                        <label for="kota_tujuan" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Kota Tujuan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-location-dot text-success"></i></span>
+                            <input type="text" name="kota_tujuan" id="kota_tujuan" class="form-control border-start-0 ps-1" placeholder="Contoh: Labuan Bajo" required>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Kota/terminal akhir titik pemberhentian bus.</div>
+                    </div>
+                    
+                    <!-- Jarak -->
+                    <div class="mb-4">
+                        <label for="jarak" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Jarak (Opsional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-road text-muted"></i></span>
+                            <input type="text" name="jarak" id="jarak" class="form-control border-start-0 ps-1" placeholder="Contoh: 130 km">
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Estimasi jarak tempuh antar kota dalam kilometer (km).</div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'rute_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Rute
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

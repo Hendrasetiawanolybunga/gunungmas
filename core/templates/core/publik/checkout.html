@@ -1,0 +1,409 @@
+{% extends 'core/publik/base_public.html' %}
+{% load humanize %}
+
+{% block title %}Checkout Manifest Penumpang - PO Gunung Mas{% endblock %}
+
+{% block content %}
+<style>
+    .checkout-header {
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 40px 0;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        color: #ffffff;
+        padding: 30px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    }
+
+    .manifest-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    .field-label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    .control-custom {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+        color: #1e293b;
+        transition: all 0.3s ease;
+    }
+
+    .control-custom:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    .ticket-badge {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    .price-total-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .seat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 240px; margin: 0 auto; }
+    .seat-btn { border-radius: 8px; padding: 10px; border: 1px solid #cbd5e1; background-color: #ffffff; font-weight: 600; text-align: center; cursor: pointer; transition: all 0.2s; color: #1e293b; }
+    .seat-btn.selected { background-color: #6366f1 !important; color: #ffffff !important; border-color: #6366f1; }
+    .seat-btn.occupied { background-color: #e2e8f0 !important; color: #94a3b8 !important; border-color: #cbd5e1; cursor: not-allowed; opacity: 0.6; }
+</style>
+
+<!-- Checkout Header -->
+<header class="checkout-header mb-5">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'public_home' %}" class="text-secondary text-decoration-none">Cari</a></li>
+                <li class="breadcrumb-item"><a href="#" onclick="window.history.back();" class="text-secondary text-decoration-none">Hasil</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Manifest</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-0">Isi Data Manifest Penumpang</h3>
+    </div>
+</header>
+
+<div class="container pb-5">
+    <div class="row g-4">
+        
+        <!-- Left Column: Summary -->
+        <div class="col-lg-5 order-lg-2">
+            <div class="summary-card sticky-top" style="top: 30px; z-index: 10;">
+                <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-receipt text-primary"></i> Ringkasan Tiket
+                </h5>
+                
+                <!-- Rute -->
+                <div class="mb-4">
+                    <div class="small text-secondary mb-1">RUTE PERJALANAN</div>
+                    <div class="fs-5 fw-bold text-white">
+                        {{ tiket.jadwal.rute.kota_asal }} <i class="fa-solid fa-arrow-right mx-2 text-muted" style="font-size: 14px;"></i> {{ tiket.jadwal.rute.kota_tujuan }}
+                    </div>
+                </div>
+                
+                <!-- Bus & Tipe -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="small text-secondary mb-1">ARMADA BUS</div>
+                        <div class="fw-semibold text-white">{{ tiket.jadwal.bus.nama_bus }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="small text-secondary mb-1">KELAS BUS</div>
+                        <div>
+                            {% if tiket.jadwal.bus.tipe_bus == 'Lux' %}
+                                <span class="badge bg-info text-dark fw-bold px-2.5 py-1.5"><i class="fa-solid fa-crown me-1"></i> {{ tiket.jadwal.bus.tipe_bus }}</span>
+                            {% elif tiket.jadwal.bus.tipe_bus == 'Premium' %}
+                                <span class="badge bg-primary text-white fw-bold px-2.5 py-1.5"><i class="fa-solid fa-star me-1"></i> {{ tiket.jadwal.bus.tipe_bus }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary text-white fw-bold px-2.5 py-1.5"><i class="fa-solid fa-bus me-1"></i> {{ tiket.jadwal.bus.tipe_bus }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Jadwal Waktu -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="small text-secondary mb-1">TANGGAL</div>
+                        <div class="fw-semibold text-white">{{ tiket.jadwal.tanggal_berangkat|date:"d M Y" }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="small text-secondary mb-1">JAM KEBERANGKATAN</div>
+                        <div class="fw-semibold text-white">{{ tiket.jadwal.jam_berangkat|time:"H:i" }} WIB</div>
+                    </div>
+                </div>
+                
+                <hr class="border-secondary mb-4">
+                
+                <!-- Tarif & Kalkulasi -->
+                <div class="price-total-box">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary small">Tarif Satuan (1 Kursi)</span>
+                        <span class="fw-bold text-white font-monospace">Rp {{ tiket.harga_tiket|intcomma }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small">Jumlah Tiket Dipesan</span>
+                        <span class="fw-bold text-white font-monospace" id="displayQty">1 Pcs</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="text-secondary small">Nomor Kursi</span>
+                        <span class="fw-bold text-white font-monospace" id="displayKursi">-</span>
+                    </div>
+                    <hr class="border-secondary my-2.5">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold text-white">Estimasi Total Bayar</span>
+                        <span class="fs-4 fw-bold text-primary font-monospace" id="displayTotal">Rp {{ tiket.harga_tiket|intcomma }}</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Right Column: Form -->
+        <div class="col-lg-7 order-lg-1">
+            <div class="manifest-card">
+                <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-user-pen text-primary me-2"></i> Manifest Penumpang</h5>
+                
+                <form action="{% url 'public_checkout' tiket.id_tiket %}" method="POST" enctype="multipart/form-data" autocomplete="off" id="checkoutForm">
+                    {% csrf_token %}
+                    
+                    <!-- Nama Lengkap -->
+                    <div class="mb-4">
+                        <label for="nama_pelanggan" class="form-label field-label">Nama Lengkap Penumpang</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" id="nama_pelanggan" class="form-control control-custom border-start-0 ps-1 bg-light" value="{{ pelanggan.nama_pelanggan }}" readonly>
+                        </div>
+                    </div>
+                    
+                    <!-- Jenis Kelamin -->
+                    <div class="mb-4">
+                        <label for="jenis_kelamin" class="form-label field-label">Jenis Kelamin</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-venus-mars"></i></span>
+                            <select id="jenis_kelamin" class="form-select control-custom border-start-0 ps-1 bg-light" disabled>
+                                <option value="Laki-laki" {% if pelanggan.jenis_kelamin == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+                                <option value="Perempuan" {% if pelanggan.jenis_kelamin == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- No Telpon -->
+                    <div class="mb-4">
+                        <label for="nomor_telpon" class="form-label field-label">Nomor Telepon / WhatsApp</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-phone"></i></span>
+                            <input type="text" id="nomor_telpon" class="form-control control-custom border-start-0 ps-1 font-monospace bg-light" value="{{ pelanggan.nomor_telpon }}" readonly>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Nomor handphone terdaftar.</div>
+                    </div>
+                    
+                    <!-- Alamat -->
+                    <div class="mb-4">
+                        <label for="alamat" class="form-label field-label">Alamat Lengkap</label>
+                        <textarea id="alamat" class="form-control control-custom bg-light" rows="3" readonly>{{ pelanggan.alamat }}</textarea>
+                    </div>
+
+                    <!-- Seat Mapping -->
+                    <div class="mb-4">
+                        <label class="form-label field-label"><i class="fa-solid fa-chair text-primary me-1"></i> Pilih Nomor Kursi Bus</label>
+                        <div class="p-3 border rounded-3 bg-light text-center mb-2">
+                            <div class="small text-muted mb-3 font-monospace">-- DEPAN / KOPILOT & DRIVER --</div>
+                            <div class="seat-grid" id="seatContainer">
+                            </div>
+                        </div>
+                        <input type="hidden" name="nomor_kursi" id="nomor_kursi_hidden" required>
+                        <div class="form-text text-muted" style="font-size: 11px;">Klik kursi yang tersedia sesuai jumlah tiket Anda.</div>
+                    </div>
+
+                    <!-- Jumlah Tiket -->
+                    <div class="mb-4">
+                        <label for="jumlah_tiket" class="form-label field-label">Jumlah Tiket yang Dipesan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-calculator"></i></span>
+                            <input type="number" name="jumlah_tiket" id="jumlah_tiket" class="form-control control-custom border-start-0 ps-1 font-monospace" value="1" min="1" required>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Tentukan berapa banyak kursi yang dipesan untuk penumpang ini.</div>
+                    </div>
+
+                    <!-- Metode Pembayaran -->
+                    <div class="mb-4">
+                        <label for="metode_bayar" class="form-label field-label">Metode Pembayaran</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-wallet"></i></span>
+                            <select name="metode_bayar" id="metode_bayar" class="form-select control-custom border-start-0 ps-1" required onchange="toggleTransferFields()">
+                                <option value="" disabled>-- Pilih Metode Pembayaran --</option>
+                                <option value="Online" selected>Pembayaran Online Otomatis (Midtrans)</option>
+                                <option value="Cash">Cash / Bayar di Loket Agen</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Rekening & Bukti Bayar (Tampil Hanya jika Transfer Bank) -->
+                    <div id="transferInfoContainer" class="mb-4">
+                        <div class="card bg-light border border-secondary-subtle rounded-3 p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold text-dark small" style="font-size: 13px;"><i class="fa-solid fa-building-columns text-primary me-1"></i> Informasi Rekening Agen:</span>
+                                <span class="badge bg-primary text-white">Bank NTT</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between bg-white border rounded p-2">
+                                <span class="font-monospace fw-bold text-dark" id="rekNumber">001.02.03.045678-9</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2.5 rounded-2 d-flex align-items-center gap-1" id="btnCopyRek" style="font-size: 11px;">
+                                    <i class="fa-regular fa-copy"></i> <span id="copyText">Salin</span>
+                                </button>
+                            </div>
+                            <div class="mt-2 text-secondary small" style="font-size: 12px;">
+                                Atas Nama: <strong>PO Gunung Mas Ruteng</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bukti_bayar" class="form-label field-label">Unggah Bukti Transfer</label>
+                            <input type="file" name="bukti_bayar" id="bukti_bayar" class="form-control" accept="image/*" required>
+                            <div class="form-text text-danger" style="font-size: 11px;">
+                                <i class="fa-solid fa-circle-info"></i> Wajib mengunggah foto/screenshot bukti transfer jika memilih metode Transfer Bank.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'public_home' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-ticket me-1"></i> Selesaikan Pemesanan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Kalkulasi Harga Dinamis & Logika Metode Pembayaran via Vanilla JS -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const qtyInput = document.getElementById('jumlah_tiket');
+        const displayQty = document.getElementById('displayQty');
+        const displayTotal = document.getElementById('displayTotal');
+        
+        const pricePerTicket = parseInt("{{ tiket.harga_tiket }}");
+        
+        const seatContainer = document.getElementById('seatContainer');
+        const nomorKursiHidden = document.getElementById('nomor_kursi_hidden');
+        const kapasitasBus = parseInt("{{ tiket.jadwal.bus.kapasitas }}");
+        const kursiTerpesan = {{ kursi_terpesan|safe }};
+        let selectedSeats = [];
+
+        function renderSeats() {
+            seatContainer.innerHTML = '';
+            for (let i = 1; i <= kapasitasBus; i++) {
+                const seatDiv = document.createElement('div');
+                seatDiv.classList.add('seat-btn');
+                seatDiv.textContent = i;
+                
+                if (kursiTerpesan.includes(i.toString())) {
+                    seatDiv.classList.add('occupied');
+                } else {
+                    seatDiv.addEventListener('click', function() {
+                        handleSeatClick(seatDiv, i);
+                    });
+                }
+                seatContainer.appendChild(seatDiv);
+            }
+        }
+
+        function handleSeatClick(seatDiv, seatNumber) {
+            if (seatDiv.classList.contains('occupied')) return;
+            
+            const maxTickets = parseInt(qtyInput.value) || 1;
+            
+            if (seatDiv.classList.contains('selected')) {
+                seatDiv.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(num => num !== seatNumber);
+            } else {
+                if (selectedSeats.length >= maxTickets) {
+                    alert(`Anda hanya dapat memilih maksimal ${maxTickets} kursi sesuai jumlah tiket.`);
+                    return;
+                }
+                seatDiv.classList.add('selected');
+                selectedSeats.push(seatNumber);
+            }
+            
+            nomorKursiHidden.value = selectedSeats.join(', ');
+            const displayKursi = document.getElementById('displayKursi');
+            if (displayKursi) {
+                displayKursi.textContent = selectedSeats.length > 0 ? selectedSeats.join(', ') : '-';
+            }
+        }
+
+        renderSeats();
+
+        qtyInput.addEventListener('input', function() {
+            let val = parseInt(qtyInput.value);
+            if (isNaN(val) || val < 1) {
+                val = 1;
+            }
+            
+            // Update qty label
+            displayQty.textContent = `${val} Pcs`;
+            
+            // Calculate total
+            const total = val * pricePerTicket;
+            
+            // Format to rupiah
+            displayTotal.textContent = `Rp ${total.toLocaleString('id-ID')}`;
+
+            // Reset seat selection when ticket quantity changes
+            selectedSeats = [];
+            nomorKursiHidden.value = '';
+            const displayKursi = document.getElementById('displayKursi');
+            if (displayKursi) displayKursi.textContent = '-';
+            renderSeats();
+        });
+
+        // Toggle Bank Info and Bukti Bayar visibility
+        const metodeBayar = document.getElementById('metode_bayar');
+        const transferContainer = document.getElementById('transferInfoContainer');
+        const buktiBayarInput = document.getElementById('bukti_bayar');
+
+        function toggleTransferFields() {
+            if (metodeBayar.value === 'Online') {
+                transferContainer.style.display = 'none';
+                buktiBayarInput.removeAttribute('required');
+            } else if (metodeBayar.value === 'Cash' || metodeBayar.value === '') {
+                transferContainer.style.display = 'none';
+                buktiBayarInput.removeAttribute('required');
+            } else {
+                transferContainer.style.display = 'block';
+                buktiBayarInput.setAttribute('required', 'required');
+            }
+        }
+
+        metodeBayar.addEventListener('change', toggleTransferFields);
+        toggleTransferFields(); // Trigger initially
+
+        // Copy Account Number
+        const btnCopyRek = document.getElementById('btnCopyRek');
+        const copyText = document.getElementById('copyText');
+        const rekNumber = document.getElementById('rekNumber');
+
+        btnCopyRek.addEventListener('click', function() {
+            navigator.clipboard.writeText(rekNumber.textContent).then(function() {
+                copyText.textContent = 'Tersalin!';
+                btnCopyRek.classList.remove('btn-outline-primary');
+                btnCopyRek.classList.add('btn-success', 'text-white');
+                
+                setTimeout(function() {
+                    copyText.textContent = 'Salin';
+                    btnCopyRek.classList.remove('btn-success', 'text-white');
+                    btnCopyRek.classList.add('btn-outline-primary');
+                }, 2000);
+            });
+        });
+    });
+</script>
+{% endblock %}

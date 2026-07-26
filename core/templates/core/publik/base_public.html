@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gunung Mas Online{% endblock %} - Pemesanan Tiket Bus Flores</title>
+    <!-- Google Fonts Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    {% block extra_head %}{% endblock %}
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-public {
+            background-color: #0f172a;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand-public {
+            font-weight: 700;
+            color: #ffffff !important;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand-public i {
+            background: linear-gradient(135deg, #6366f1, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-link-public {
+            color: #cbd5e1 !important;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 16px !important;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link-public:hover {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link-public.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        main {
+            flex-grow: 1;
+        }
+
+        .footer-public {
+            background-color: #0f172a;
+            color: #94a3b8;
+            border-top: 1px solid #1e293b;
+            padding: 50px 0 20px 0;
+            font-size: 14px;
+        }
+
+        .footer-title {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        /* Print optimization */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+        }
+
+        /* Responsive Mobile Animation & Styling */
+        .navbar-collapse {
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-link-public {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link-public::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #d946ef);
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+        
+        .nav-link-public:hover::after {
+            width: 80%;
+            left: 10%;
+        }
+        
+        .nav-link-public.active::after {
+            width: 0;
+        }
+
+        @media (max-width: 768px) {
+            body { font-size: 13px !important; }
+            h1, .welcome-title { font-size: 20px !important; }
+            h2, h3, .metric-value { font-size: 22px !important; }
+            .card, .metric-card, .welcome-banner { padding: 15px !important; border-radius: 12px !important; }
+            .metric-icon { font-size: 30px !important; top: 15px !important; right: 15px !important; }
+            .btn { padding: 8px 14px !important; font-size: 13px !important; }
+            /* Memastikan card list bus dan tiket mengecil proporsional di HP */
+            .display-mobile-small { font-size: 12px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Pengunjung -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-public py-3 no-print">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-public" href="{% url 'public_home' %}">
+                <i class="fa-solid fa-bus"></i>
+                <span>Agen Gunung Mas</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2 align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-public {% if request.resolver_match.url_name == 'public_home' %}active{% endif %}" href="{% url 'public_home' %}">
+                            <i class="fa-solid fa-house me-1"></i> Home
+                        </a>
+                    </li>
+                    {% if request.session.pelanggan_id %}
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-public {% if request.resolver_match.url_name == 'pelanggan_riwayat' %}active{% endif %}" href="{% url 'pelanggan_riwayat' %}">
+                                <i class="fa-solid fa-clock-rotate-left me-1"></i> Riwayat Tiket
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-public {% if request.resolver_match.url_name == 'public_search' %}active{% endif %}" href="{% url 'public_home' %}#cari">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Cari Tiket
+                        </a>
+                    </li>
+                    
+                    <!-- Jam Digital -->
+                    <li class="nav-item d-flex align-items-center mx-lg-2 my-2 my-lg-0">
+                        <div id="jam-digital" class="fw-bold text-white-50 small font-monospace"></div>
+                    </li>
+                    
+                    {% if request.session.pelanggan_id %}
+                        <li class="nav-item d-flex align-items-center ms-lg-2 my-2 my-lg-0">
+                            <span class="text-white-50 small" style="font-size: 13.5px;">
+                                <i class="fa-solid fa-user-circle text-primary me-1"></i> Halo, <strong>{{ request.session.pelanggan_nama }}</strong>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-public {% if request.resolver_match.url_name == 'pelanggan_profil' %}active{% endif %}" href="{% url 'pelanggan_profil' %}">
+                                <i class="fa-solid fa-user-gear me-1"></i> Kelola Akun
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-public text-danger" href="{% url 'pelanggan_logout' %}">
+                                <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-public" href="{% url 'pelanggan_login' %}">
+                                <i class="fa-solid fa-user me-1"></i> Login Penumpang
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer Pengunjung -->
+    <footer class="footer-public no-print">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4">
+                    <div class="footer-title d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-bus text-primary" style="font-size: 20px;"></i>
+                        <span>PO Gunung Mas Ruteng</span>
+                    </div>
+                    <p class="small text-secondary">
+                        Layanan transportasi darat terpercaya di daratan Flores, Nusa Tenggara Timur. Kami berkomitmen memberikan perjalanan aman, nyaman, dan terjadwal tepat waktu.
+                    </p>
+                    <div class="mt-3">
+                        <span class="d-inline-block me-3"><a href="#" class="text-secondary"><i class="fa-brands fa-facebook fa-lg"></i></a></span>
+                        <span class="d-inline-block me-3"><a href="#" class="text-secondary"><i class="fa-brands fa-whatsapp fa-lg"></i></a></span>
+                        <span class="d-inline-block"><a href="#" class="text-secondary"><i class="fa-brands fa-instagram fa-lg"></i></a></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 col-lg-2">
+                    <div class="footer-title">Jaringan Flores</div>
+                    <ul class="footer-links">
+                        <li><i class="fa-solid fa-location-dot me-2 text-primary" style="font-size: 11px;"></i> Ruteng (Pusat)</li>
+                        <li><i class="fa-solid fa-location-dot me-2 text-success" style="font-size: 11px;"></i> Labuan Bajo</li>
+                        <li><i class="fa-solid fa-location-dot me-2 text-warning" style="font-size: 11px;"></i> Ende</li>
+                        <li><i class="fa-solid fa-location-dot me-2 text-danger" style="font-size: 11px;"></i> Maumere</li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-4 col-lg-3">
+                    <div class="footer-title">Layanan Tiket</div>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'public_home' %}"><i class="fa-solid fa-chevron-right me-2" style="font-size: 10px;"></i> Cari Jadwal Keberangkatan</a></li>
+                        <li><a href="{% url 'public_home' %}"><i class="fa-solid fa-chevron-right me-2" style="font-size: 10px;"></i> Tarif Kelas Bus</a></li>
+                        <li><a href="{% url 'login' %}"><i class="fa-solid fa-chevron-right me-2" style="font-size: 10px;"></i> Login Petugas Agen</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-4 col-lg-3">
+                    <div class="footer-title">Hubungi Kami</div>
+                    <p class="small text-secondary mb-2"><i class="fa-solid fa-map-marked-alt me-2 text-primary"></i> Jl. Kelimutu No. 10, Ruteng, Flores, NTT</p>
+                    <p class="small text-secondary mb-2"><i class="fa-solid fa-phone-alt me-2 text-success"></i> +62 812-3456-7890</p>
+                    <p class="small text-secondary"><i class="fa-solid fa-envelope me-2 text-warning"></i> support@gunungmas.com</p>
+                </div>
+            </div>
+            
+            <div class="border-top border-secondary pt-3 mt-4 text-center">
+                <p class="small text-secondary mb-0">&copy; 2026 Agen PO Gunung Mas Ruteng. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Script Global untuk Django Messages via SweetAlert2 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if messages %}
+                {% for message in messages %}
+                    let iconType = 'info';
+                    {% if message.tags == 'error' %}
+                        iconType = 'error';
+                    {% elif message.tags == 'success' %}
+                        iconType = 'success';
+                    {% elif message.tags == 'warning' %}
+                        iconType = 'warning';
+                    {% elif message.tags == 'info' %}
+                        iconType = 'info';
+                    {% endif %}
+                    
+                    Swal.fire({
+                        icon: iconType,
+                        title: iconType.charAt(0).toUpperCase() + iconType.slice(1),
+                        text: "{{ message|escapejs }}",
+                        background: '#ffffff',
+                        color: '#1e293b',
+                        confirmButtonColor: '#4f46e5',
+                    });
+                {% endfor %}
+            {% endif %}
+        });
+    <!-- Jam Digital Real-Time Script -->
+    <script>
+        function updateJamDigital() {
+            const sekarang = new Date();
+            const opsi = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Makassar' };
+            const stringWaktu = sekarang.toLocaleTimeString('id-ID', opsi);
+            const elemenJam = document.getElementById('jam-digital');
+            if (elemenJam) {
+                elemenJam.innerHTML = `<i class="fa-solid fa-clock me-1 text-primary"></i> ${stringWaktu} WITA`;
+            }
+        }
+        setInterval(updateJamDigital, 1000);
+        updateJamDigital();
+    </script>
+</body>
+</html>

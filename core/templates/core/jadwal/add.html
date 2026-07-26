@@ -1,0 +1,93 @@
+{% extends 'core/base_dashboard.html' %}
+
+{% block title %}Tambah Jadwal Baru{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'jadwal_index' %}" class="btn btn-link text-decoration-none text-secondary p-0 mb-2">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Jadwal
+    </a>
+    <h4 class="fw-bold text-dark mb-1">Tambah Jadwal Baru</h4>
+    <p class="text-secondary small mb-0">Tentukan kombinasi armada bus, rute perjalanan, serta detail waktu keberangkatan.</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-semibold mb-0 text-dark">Formulir Jadwal Baru</h6>
+            </div>
+            <div class="card-body p-4">
+                <form action="{% url 'jadwal_add' %}" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    
+                    <!-- Pilih Bus -->
+                    <div class="mb-4">
+                        <label for="id_bus" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Armada Bus</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-bus"></i></span>
+                            <select name="id_bus" id="id_bus" class="form-select border-start-0 ps-1" required>
+                                <option value="" disabled selected>Pilih Bus...</option>
+                                {% for bus in list_bus %}
+                                    <option value="{{ bus.id_bus }}">{{ bus.nama_bus }} (Kelas: {{ bus.tipe_bus }} | Plat: {{ bus.nomor_polisi }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Pilih bus yang ditugaskan untuk perjalanan ini.</div>
+                    </div>
+                    
+                    <!-- Pilih Rute -->
+                    <div class="mb-4">
+                        <label for="id_rute" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Rute Perjalanan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-route"></i></span>
+                            <select name="id_rute" id="id_rute" class="form-select border-start-0 ps-1" required>
+                                <option value="" disabled selected>Pilih Rute...</option>
+                                {% for rute in list_rute %}
+                                    <option value="{{ rute.id_rute }}">{{ rute.kota_asal }} - {{ rute.kota_tujuan }} {% if rute.jarak %}({{ rute.jarak }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Pilih lintasan asal dan tujuan keberangkatan.</div>
+                    </div>
+                    
+                    <!-- Tanggal Berangkat -->
+                    <div class="mb-4">
+                        <label for="tanggal_berangkat" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Tanggal Keberangkatan</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-calendar"></i></span>
+                            <input type="date" name="tanggal_berangkat" id="tanggal_berangkat" class="form-control border-start-0 ps-1" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Waktu Berangkat & Tiba -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="jam_berangkat" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Jam Berangkat</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-regular fa-clock"></i></span>
+                                <input type="time" name="jam_berangkat" id="jam_berangkat" class="form-control border-start-0 ps-1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jam_tiba" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Jam Tiba (Estimasi)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-regular fa-clock"></i></span>
+                                <input type="time" name="jam_tiba" id="jam_tiba" class="form-control border-start-0 ps-1" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                        <a href="{% url 'jadwal_index' %}" class="btn btn-outline-secondary px-4 rounded-3">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Simpan Jadwal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

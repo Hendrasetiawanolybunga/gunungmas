@@ -1,0 +1,93 @@
+{% extends 'core/laporan/laporan_base.html' %}
+{% load humanize %}
+
+{% block report_page_title %}Laporan Pendapatan Bersih{% endblock %}
+
+{% block report_icon %}<i class="fa-solid fa-wallet text-success me-2"></i>{% endblock %}
+{% block report_title %}Laporan Rekapitulasi Pendapatan Bersih (Lunas){% endblock %}
+{% block report_subtitle %}Pantau rekapitulasi data keuangan uang masuk dari pemesanan tiket dengan status Lunas.{% endblock %}
+
+{% block unduh_url %}{% url 'laporan_unduh_pdf' 'pendapatan' %}{% endblock %}
+
+{% block filter_fields %}
+<div class="col-md-5">
+    <label for="start_date" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Tanggal Awal</label>
+    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|default:'' }}">
+</div>
+<div class="col-md-5">
+    <label for="end_date" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Tanggal Akhir</label>
+    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|default:'' }}">
+</div>
+{% endblock %}
+
+{% block report_table %}
+<!-- Big Badge Ringkasan Total Pendapatan -->
+<div class="p-4 border-bottom bg-light-subtle">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-success text-white rounded-4 p-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fa-solid fa-wallet fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-secondary small d-block mb-0.5" style="letter-spacing: 0.5px;">TOTAL REKAPITULASI PENDAPATAN BERSIH (LUNAS)</span>
+                    <h3 class="fw-bold text-success font-monospace mb-0">Rp {{ total_pendapatan|intcomma }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
+        <thead class="table-light text-secondary font-monospace" style="font-size: 12px; letter-spacing: 0.5px;">
+            <tr>
+                <th class="py-3 ps-4" style="width: 80px;">NO</th>
+                <th class="py-3">NO. BOOKING</th>
+                <th class="py-3">PELANGGAN</th>
+                <th class="py-3">RUTE PERJALANAN</th>
+                <th class="py-3">TANGGAL TRANSAKSI</th>
+                <th class="py-3 text-center">JUMLAH TIKET</th>
+                <th class="py-3 pe-4 text-end">TOTAL PENDAPATAN</th>
+            </tr>
+        </thead>
+        <tbody class="text-dark" style="font-size: 14px;">
+            {% if data %}
+                {% for r in data %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-secondary">{{ forloop.counter }}</td>
+                        <td class="fw-bold font-monospace text-primary">GM-{{ r.id_pemesanan|stringformat:"05d" }}</td>
+                        <td class="fw-semibold">{{ r.pelanggan.nama_pelanggan }}</td>
+                        <td>
+                            {{ r.tiket.jadwal.rute.kota_asal }} 
+                            <i class="fa-solid fa-arrow-right mx-1 text-muted" style="font-size: 11px;"></i> 
+                            {{ r.tiket.jadwal.rute.kota_tujuan }}
+                        </td>
+                        <td class="font-monospace text-secondary">{{ r.tanggal_pesan|date:"d M Y" }}</td>
+                        <td class="text-center font-monospace">{{ r.jumlah_tiket }} Pcs</td>
+                        <td class="pe-4 text-end fw-bold font-monospace text-success">
+                            Rp {{ r.pembayaran.jumlah_bayar|intcomma }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr class="table-light fw-bold">
+                    <td colspan="6" class="text-end py-3 ps-4">TOTAL KESELURUHAN:</td>
+                    <td class="pe-4 text-end font-monospace text-success py-3" style="font-size: 15px;">
+                        Rp {{ total_pendapatan|intcomma }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="text-secondary mb-3">
+                            <i class="fa-solid fa-wallet display-4 opacity-25"></i>
+                        </div>
+                        <h6 class="fw-semibold text-secondary">Tidak ada data pendapatan lunas ditemukan</h6>
+                        <p class="text-muted small mb-0">Coba sesuaikan jangka tanggal filter Anda.</p>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

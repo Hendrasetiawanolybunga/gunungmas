@@ -1,0 +1,262 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laporan Resmi PO Gunung Mas</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+        /* Kop Surat Styles */
+        .kop-table { 
+            width: 100%; 
+            border-bottom: 3px double #0f172a; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px;
+        }
+        .company-title { 
+            font-size: 22px; 
+            font-weight: bold; 
+            color: #1e3a8a; 
+            letter-spacing: 1px; 
+            margin: 0; 
+            text-align: center; 
+        }
+        .company-subtitle { 
+            font-size: 10px; 
+            color: #475569; 
+            margin: 3px 0 0 0; 
+            text-align: center; 
+        }
+        
+        /* Body Content Styles */
+        .report-title { text-align: center; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-top: 10px; color: #0f172a; }
+        .report-metadata { width: 100%; margin-top: 5px; margin-bottom: 15px; font-size: 10px; color: #475569; }
+        
+        /* Table Data Styles */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .data-table th { border: 1px solid #cbd5e1; background-color: #f1f5f9; padding: 8px 6px; font-size: 10px; font-weight: bold; text-align: left; text-transform: uppercase; }
+        .data-table td { border: 1px solid #cbd5e1; padding: 7px 6px; font-size: 9px; vertical-align: middle; }
+        .row-total { background-color: #f8fafc; font-weight: bold; }
+        
+        /* Footer Penandatanganan Styles */
+        .footer-layout-table { width: 100%; margin-top: 35px; }
+        .signature-box { text-align: center; font-size: 10px; width: 35%; float: right; }
+        .signature-space { height: 50px; }
+    </style>
+</head>
+<body>
+
+    <table class="kop-table">
+        <tr>
+            <td style="width: 100%; text-align: center; vertical-align: middle;">
+                <div class="company-title">PERUSAHAAN OTOBUS GUNUNG MAS RUTE-FLORES</div>
+                <div class="company-subtitle">Jalan Kelimutu No. 10, Kel. Pitak, Kec. Langke Rembong, Ruteng, Nusa Tenggara Timur</div>
+                <div class="company-subtitle">Telp: +62 812-3456-7890 | Email: support@gunungmas.com</div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="report-title">
+        {% if jenis_laporan == 'pelanggan' %}Laporan Data Manifest Pelanggan
+        {% elif jenis_laporan == 'bus_rute' %}Laporan Inventaris Armada & Distribusi Rute
+        {% elif jenis_laporan == 'pemesanan_pembayaran' %}Laporan Transaksi Pemesanan & Status Keuangan
+        {% elif jenis_laporan == 'jadwal_tiket' %}Laporan Penjadwalan & Ketersediaan Tiket Terbitan
+        {% elif jenis_laporan == 'pendapatan' %}Laporan Rekapitulasi Pendapatan Bersih (Lunas)
+        {% endif %}
+    </div>
+
+    <table class="report-metadata">
+        <tr>
+            <td style="text-align: left;">Dicetak Oleh: <strong>Sistem Administrator</strong></td>
+            <td style="text-align: right;">Waktu Cetak: <strong>{{ waktu_cetak }}</strong></td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        {% if jenis_laporan == 'pelanggan' %}
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 20%;">Nama Pelanggan</th>
+                    <th style="width: 12%;">Jenis Kelamin</th>
+                    <th style="width: 15%;">No. Telepon</th>
+                    <th style="width: 30%;">Alamat Lengkap</th>
+                    <th style="width: 18%;">Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ p.nama_pelanggan }}</strong></td>
+                    <td>{{ p.jenis_kelamin }}</td>
+                    <td>{{ p.nomor_telpon }}</td>
+                    <td>{{ p.alamat }}</td>
+                    <td>{{ p.email|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align: center;">Tidak ada data pelanggan ditemukan.</td></tr>
+                {% endfor %}
+            </tbody>
+        {% endif %}
+
+        {% if jenis_laporan == 'bus_rute' %}
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 25%;">Nama Armada Bus</th>
+                    <th style="width: 15%;">Tipe / Kelas Bus</th>
+                    <th style="width: 15%;">Plat Nomor Polisi</th>
+                    <th style="width: 15%;">Kapasitas Kursi</th>
+                    <th style="width: 25%;">Sopir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ b.nama_bus }}</strong></td>
+                    <td>{{ b.tipe_bus }}</td>
+                    <td>{{ b.nomor_polisi }}</td>
+                    <td>{{ b.kapasitas }} Penumpang</td>
+                    <td>{{ b.sopir.nama_sopir|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align: center;">Tidak ada data armada bus ditemukan.</td></tr>
+                {% endfor %}
+            </tbody>
+        {% endif %}
+
+        {% if jenis_laporan == 'pemesanan_pembayaran' %}
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 13%;">No. Booking</th>
+                    <th style="width: 18%;">Nama Pelanggan</th>
+                    <th style="width: 24%;">Rute Perjalanan</th>
+                    <th style="width: 14%;">Tanggal Pesan</th>
+                    <th style="width: 6%; text-align: center;">Qty</th>
+                    <th style="width: 12%;">Total Bayar</th>
+                    <th style="width: 8%;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>GM-{{ r.id_pemesanan|stringformat:"05d" }}</strong></td>
+                    <td>{{ r.pelanggan.nama_pelanggan }}</td>
+                    <td>{{ r.tiket.jadwal.rute.kota_asal }} - {{ r.tiket.jadwal.rute.kota_tujuan }}</td>
+                    <td>{{ r.tanggal_pesan|date:"d M Y" }}</td>
+                    <td style="text-align: center;">{{ r.jumlah_tiket }}</td>
+                    <td>
+                        {% if r.pembayaran %}
+                            Rp {{ r.pembayaran.jumlah_bayar|intcomma }}
+                        {% else %}
+                            Rp 0
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if r.pembayaran %}
+                            {{ r.pembayaran.status }}
+                        {% else %}
+                            Belum Lunas
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align: center;">Tidak ada data pemesanan ditemukan.</td></tr>
+                {% endfor %}
+            </tbody>
+        {% endif %}
+
+        {% if jenis_laporan == 'jadwal_tiket' %}
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 35%;">Rute & Jadwal Keberangkatan</th>
+                    <th style="width: 25%;">Armada Bus / Kelas</th>
+                    <th style="width: 20%;">Tarif Harga</th>
+                    <th style="width: 15%;">Status Tiket</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <strong>{{ t.jadwal.rute.kota_asal }} - {{ t.jadwal.rute.kota_tujuan }}</strong><br>
+                        Tanggal: {{ t.jadwal.tanggal_berangkat|date:"d M Y" }} | Jam: {{ t.jadwal.jam_berangkat|time:"H:i" }} WITA
+                    </td>
+                    <td>{{ t.jadwal.bus.nama_bus }} ({{ t.jadwal.bus.tipe_bus }})</td>
+                    <td>Rp {{ t.harga_tiket|intcomma }}</td>
+                    <td>{{ t.status }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" style="text-align: center;">Tidak ada data tiket ditemukan.</td></tr>
+                {% endfor %}
+            </tbody>
+        {% endif %}
+
+        {% if jenis_laporan == 'pendapatan' %}
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No</th>
+                    <th style="width: 12%;">No. Booking</th>
+                    <th style="width: 18%;">Nama Pelanggan</th>
+                    <th style="width: 25%;">Rute Perjalanan</th>
+                    <th style="width: 15%;">Tanggal Transaksi</th>
+                    <th style="width: 10%; text-align: center;">Jumlah Tiket</th>
+                    <th style="width: 15%; text-align: right;">Total Pendapatan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>GM-{{ r.id_pemesanan|stringformat:"05d" }}</strong></td>
+                    <td>{{ r.pelanggan.nama_pelanggan }}</td>
+                    <td>{{ r.tiket.jadwal.rute.kota_asal }} - {{ r.tiket.jadwal.rute.kota_tujuan }}</td>
+                    <td>{{ r.tanggal_pesan|date:"d M Y" }}</td>
+                    <td style="text-align: center;">{{ r.jumlah_tiket }} Pcs</td>
+                    <td style="text-align: right; color: #166534; font-weight: bold;">
+                        Rp {{ r.pembayaran.jumlah_bayar|intcomma }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align: center;">Tidak ada data transaksi lunas ditemukan.</td></tr>
+                {% endfor %}
+                {% if data %}
+                <tr class="row-total">
+                    <td colspan="6" style="text-align: right; font-weight: bold; padding: 10px;">TOTAL PENDAPATAN BERSIH:</td>
+                    <td style="text-align: right; font-weight: bold; color: #166534; font-size: 11px;">
+                        Rp {{ total_pendapatan|intcomma }}
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        {% endif %}
+    </table>
+
+    <table class="footer-layout-table">
+        <tr>
+            <td style="width: 65%;"></td>
+            <td class="signature-box">
+                <div>Ruteng, {{ waktu_cetak|slice:":11" }}</div>
+                <div style="font-weight: bold; margin-top: 5px;">Kepala Loket Agen Ruteng</div>
+                <div class="signature-space"></div>
+                <div style="text-decoration: underline; font-weight: bold;">Mario E. Nagung, S.Kom</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">NIP. GM-202607-001</div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

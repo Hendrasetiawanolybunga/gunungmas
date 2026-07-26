@@ -1,0 +1,199 @@
+{% extends 'core/publik/base_public.html' %}
+
+{% block title %}Hasil Pencarian Tiket - PO Gunung Mas{% endblock %}
+
+{% block content %}
+<style>
+    .search-header {
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 40px 0;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .result-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .result-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        border-color: #cbd5e1;
+    }
+
+    .bus-avatar {
+        width: 55px;
+        height: 55px;
+        border-radius: 16px;
+        background-color: #f1f5f9;
+        color: #6366f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .route-node {
+        position: relative;
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 17px;
+    }
+
+    .time-badge {
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .price-tag {
+        font-size: 24px;
+        font-weight: 700;
+        color: #4f46e5;
+        font-family: monospace;
+    }
+
+    .btn-book {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+
+    .btn-book:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+        color: #ffffff;
+    }
+
+    .empty-state {
+        padding: 80px 0;
+        text-align: center;
+    }
+</style>
+
+<!-- Search Params Header -->
+<header class="search-header">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{% url 'public_home' %}" class="text-secondary text-decoration-none">Cari</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">Hasil Pencarian</li>
+                    </ol>
+                </nav>
+                <h3 class="fw-bold mb-0">
+                    Hasil Pencarian: {{ asal }} <i class="fa-solid fa-arrow-right mx-1" style="font-size: 15px;"></i> {{ tujuan }}
+                </h3>
+            </div>
+            <div class="bg-dark-subtle border border-secondary px-3 py-2 rounded-3 text-secondary font-monospace" style="font-size: 13px;">
+                <i class="fa-regular fa-calendar me-1"></i> Keberangkatan: {{ tanggal|date:"d M Y"|default:tanggal }}
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Results List Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                {% if tiket_list %}
+                    <h5 class="fw-bold text-dark mb-4"><i class="fa-solid fa-list-check text-primary me-2"></i> Jadwal Bus Tersedia</h5>
+                    {% for t in tiket_list %}
+                        <div class="result-card">
+                            <div class="row align-items-center g-4">
+                                <!-- Bus Info -->
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bus-avatar">
+                                            <i class="fa-solid fa-bus-simple"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">{{ t.jadwal.bus.nama_bus }}</h6>
+                                            {% if t.jadwal.bus.tipe_bus == 'Lux' %}
+                                                <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1 fw-semibold" style="font-size: 11px;">
+                                                    <i class="fa-solid fa-crown me-1"></i> {{ t.jadwal.bus.tipe_bus }}
+                                                </span>
+                                            {% elif t.jadwal.bus.tipe_bus == 'Premium' %}
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 11px;">
+                                                    <i class="fa-solid fa-star me-1"></i> {{ t.jadwal.bus.tipe_bus }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 fw-semibold" style="font-size: 11px;">
+                                                    <i class="fa-solid fa-bus me-1"></i> {{ t.jadwal.bus.tipe_bus }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Time & Schedule -->
+                                <div class="col-md-5 col-lg-5 border-start border-end-md px-lg-4">
+                                    <div class="row g-2 text-center text-sm-start">
+                                        <div class="col-sm-5">
+                                            <div class="time-badge">Jam Berangkat</div>
+                                            <div class="route-node">{{ t.jadwal.jam_berangkat|time:"H:i" }}</div>
+                                            <small class="text-secondary"><i class="fa-solid fa-circle-dot me-1 text-primary" style="font-size: 10px;"></i> {{ t.jadwal.rute.kota_asal }}</small>
+                                        </div>
+                                        <div class="col-sm-2 d-none d-sm-flex align-items-center justify-content-center">
+                                            <i class="fa-solid fa-circle-arrow-right text-muted fs-4"></i>
+                                        </div>
+                                        <div class="col-sm-5">
+                                            <div class="time-badge">Estimasi Tiba</div>
+                                            <div class="route-node">{{ t.jadwal.jam_tiba|time:"H:i" }}</div>
+                                            <small class="text-secondary"><i class="fa-solid fa-location-dot me-1 text-success" style="font-size: 10px;"></i> {{ t.jadwal.rute.kota_tujuan }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Price & Action -->
+                                <div class="col-md-3 col-lg-4 text-center text-md-end">
+                                    <div class="mb-2">
+                                        <span class="small text-secondary d-block">Harga per Kursi</span>
+                                        <span class="price-tag">Rp {{ t.harga_tiket|floatformat:"0" }}</span>
+                                    </div>
+                                    <a href="{% url 'public_checkout' t.id_tiket %}" class="btn-book">
+                                        Pesan Sekarang <i class="fa-solid fa-angle-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <div class="mb-4">
+                            <i class="fa-solid fa-route display-1 text-secondary opacity-25"></i>
+                        </div>
+                        <h4 class="fw-bold text-dark">Jadwal Tidak Ditemukan</h4>
+                        <p class="text-secondary small mx-auto" style="max-width: 480px;">
+                            Maaf, tidak ada jadwal keberangkatan untuk rute <strong>{{ asal }}</strong> menuju <strong>{{ tujuan }}</strong> pada tanggal <strong>{{ tanggal|date:"d M Y"|default:tanggal }}</strong>. Silakan cari rute lain atau pilih tanggal keberangkatan yang berbeda.
+                        </p>
+                        <a href="{% url 'public_home' %}" class="btn btn-outline-primary px-4 py-2 rounded-3 mt-3">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Kembali ke Pencarian
+                        </a>
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
