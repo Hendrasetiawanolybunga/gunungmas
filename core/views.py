@@ -8,6 +8,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from io import BytesIO
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 import json
 import time
 import midtransclient
@@ -798,6 +799,7 @@ def public_search(request):
     }
     return render(request, 'core/publik/search_results.html', context)
 
+@transaction.atomic
 def public_checkout(request, id_tiket):
     # Proteksi Session Pelanggan
     if 'pelanggan_id' not in request.session:

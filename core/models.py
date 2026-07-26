@@ -87,7 +87,7 @@ class Pemesanan(models.Model):
 class Pembayaran(models.Model):
     id_pembayaran = models.AutoField(primary_key=True)
     pelanggan = models.ForeignKey(Pelanggan, on_delete=models.CASCADE, db_column='id_pelanggan')
-    metode_bayar = models.CharField(max_length=20) # Cash, Transfer
+    metode_bayar = models.CharField(max_length=20, default='Online', blank=True, null=True)
     jumlah_bayar = models.DecimalField(max_digits=10, decimal_places=0)
     status = models.CharField(max_length=20, default='Belum Lunas') # Lunas, Belum Lunas
     bukti_bayar = models.ImageField(upload_to='payment_proofs/', blank=True, null=True)
