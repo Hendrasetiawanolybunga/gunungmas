@@ -231,40 +231,13 @@
 
                     <!-- Metode Pembayaran -->
                     <div class="mb-4">
-                        <label for="metode_bayar" class="form-label field-label">Metode Pembayaran</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-wallet"></i></span>
-                            <select name="metode_bayar" id="metode_bayar" class="form-select control-custom border-start-0 ps-1" required onchange="toggleTransferFields()">
-                                <option value="" disabled>-- Pilih Metode Pembayaran --</option>
-                                <option value="Online" selected>Pembayaran Online Otomatis (Midtrans)</option>
-                                <option value="Cash">Cash / Bayar di Loket Agen</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Informasi Rekening & Bukti Bayar (Tampil Hanya jika Transfer Bank) -->
-                    <div id="transferInfoContainer" class="mb-4">
-                        <div class="card bg-light border border-secondary-subtle rounded-3 p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-semibold text-dark small" style="font-size: 13px;"><i class="fa-solid fa-building-columns text-primary me-1"></i> Informasi Rekening Agen:</span>
-                                <span class="badge bg-primary text-white">Bank NTT</span>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between bg-white border rounded p-2">
-                                <span class="font-monospace fw-bold text-dark" id="rekNumber">001.02.03.045678-9</span>
-                                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2.5 rounded-2 d-flex align-items-center gap-1" id="btnCopyRek" style="font-size: 11px;">
-                                    <i class="fa-regular fa-copy"></i> <span id="copyText">Salin</span>
-                                </button>
-                            </div>
-                            <div class="mt-2 text-secondary small" style="font-size: 12px;">
-                                Atas Nama: <strong>PO Gunung Mas Ruteng</strong>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="bukti_bayar" class="form-label field-label">Unggah Bukti Transfer</label>
-                            <input type="file" name="bukti_bayar" id="bukti_bayar" class="form-control" accept="image/*" required>
-                            <div class="form-text text-danger" style="font-size: 11px;">
-                                <i class="fa-solid fa-circle-info"></i> Wajib mengunggah foto/screenshot bukti transfer jika memilih metode Transfer Bank.
+                        <label class="form-label field-label">Metode Pembayaran</label>
+                        <input type="hidden" name="metode_bayar" value="Online">
+                        <div class="p-3 border rounded-3 bg-light d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-credit-card text-primary fs-5"></i>
+                            <div>
+                                <span class="fw-bold d-block" style="font-size: 14px;">Pembayaran Online Otomatis</span>
+                                <span class="text-muted d-block" style="font-size: 11px;">Didukung aman oleh Midtrans (Virtual Account, QRIS, dll)</span>
                             </div>
                         </div>
                     </div>
@@ -365,45 +338,6 @@
             renderSeats();
         });
 
-        // Toggle Bank Info and Bukti Bayar visibility
-        const metodeBayar = document.getElementById('metode_bayar');
-        const transferContainer = document.getElementById('transferInfoContainer');
-        const buktiBayarInput = document.getElementById('bukti_bayar');
-
-        function toggleTransferFields() {
-            if (metodeBayar.value === 'Online') {
-                transferContainer.style.display = 'none';
-                buktiBayarInput.removeAttribute('required');
-            } else if (metodeBayar.value === 'Cash' || metodeBayar.value === '') {
-                transferContainer.style.display = 'none';
-                buktiBayarInput.removeAttribute('required');
-            } else {
-                transferContainer.style.display = 'block';
-                buktiBayarInput.setAttribute('required', 'required');
-            }
-        }
-
-        metodeBayar.addEventListener('change', toggleTransferFields);
-        toggleTransferFields(); // Trigger initially
-
-        // Copy Account Number
-        const btnCopyRek = document.getElementById('btnCopyRek');
-        const copyText = document.getElementById('copyText');
-        const rekNumber = document.getElementById('rekNumber');
-
-        btnCopyRek.addEventListener('click', function() {
-            navigator.clipboard.writeText(rekNumber.textContent).then(function() {
-                copyText.textContent = 'Tersalin!';
-                btnCopyRek.classList.remove('btn-outline-primary');
-                btnCopyRek.classList.add('btn-success', 'text-white');
-                
-                setTimeout(function() {
-                    copyText.textContent = 'Salin';
-                    btnCopyRek.classList.remove('btn-success', 'text-white');
-                    btnCopyRek.classList.add('btn-outline-primary');
-                }, 2000);
-            });
-        });
     });
 </script>
 {% endblock %}

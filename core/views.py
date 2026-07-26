@@ -821,7 +821,7 @@ def public_checkout(request, id_tiket):
             
     if request.method == 'POST':
         jumlah_tiket = int(request.POST.get('jumlah_tiket', 1))
-        metode_bayar = request.POST.get('metode_bayar')
+        metode_bayar = 'Online'
         file_bukti = request.FILES.get('bukti_bayar')
         nomor_kursi = request.POST.get('nomor_kursi')
         
@@ -833,9 +833,9 @@ def public_checkout(request, id_tiket):
             nomor_kursi=nomor_kursi
         )
         
-        # b. Hitung total bayar dan buat record Pembayaran baru (Belum Lunas / Menunggu Verifikasi)
+        # b. Hitung total bayar dan buat record Pembayaran baru (Pending)
         total_bayar = jumlah_tiket * tiket.harga_tiket
-        status_default = 'Pending' if metode_bayar == 'Online' else 'Belum Lunas'
+        status_default = 'Pending'
         order_id = f"GM-{pemesanan.id_pemesanan}-{int(time.time())}"
         
         pembayaran = Pembayaran.objects.create(
@@ -847,23 +847,22 @@ def public_checkout(request, id_tiket):
             order_id=order_id
         )
         
-        if metode_bayar == 'Online':
-            snap = midtransclient.Snap(
-                is_production=settings.MIDTRANS_IS_PRODUCTION,
-                server_key=settings.MIDTRANS_SERVER_KEY,
-                client_key=settings.MIDTRANS_CLIENT_KEY
-            )
-            param = {
-                "transaction_details": { "order_id": order_id, "gross_amount": int(total_bayar) },
-                "customer_details": {
-                    "first_name": pelanggan.nama_pelanggan,
-                    "email": pelanggan.email or "guest@gunungmas.com",
-                    "phone": pelanggan.nomor_telpon
-                }
+        snap = midtransclient.Snap(
+            is_production=settings.MIDTRANS_IS_PRODUCTION,
+            server_key=settings.MIDTRANS_SERVER_KEY,
+            client_key=settings.MIDTRANS_CLIENT_KEY
+        )
+        param = {
+            "transaction_details": { "order_id": order_id, "gross_amount": int(total_bayar) },
+            "customer_details": {
+                "first_name": pelanggan.nama_pelanggan,
+                "email": pelanggan.email or "guest@gunungmas.com",
+                "phone": pelanggan.nomor_telpon
             }
-            transaction = snap.create_transaction(param)
-            pembayaran.snap_token = transaction['token']
-            pembayaran.save()
+        }
+        transaction = snap.create_transaction(param)
+        pembayaran.snap_token = transaction['token']
+        pembayaran.save()
         
         # c. SweetAlert2 success message
         messages.success(request, f"Pemesanan atas nama {pelanggan.nama_pelanggan} berhasil dibuat! Silakan lakukan pembayaran.")
