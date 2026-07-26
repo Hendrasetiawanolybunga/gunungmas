@@ -824,7 +824,6 @@ def public_checkout(request, id_tiket):
     if request.method == 'POST':
         jumlah_tiket = int(request.POST.get('jumlah_tiket', 1))
         metode_bayar = 'Online'
-        file_bukti = request.FILES.get('bukti_bayar')
         nomor_kursi = request.POST.get('nomor_kursi')
         
         # a. Buat record Pemesanan baru menggunakan pelanggan yang login
@@ -845,7 +844,6 @@ def public_checkout(request, id_tiket):
             metode_bayar=metode_bayar,
             jumlah_bayar=total_bayar,
             status=status_default,
-            bukti_bayar=file_bukti,
             order_id=order_id
         )
         
@@ -885,7 +883,7 @@ def public_invoice(request, id_pemesanan):
         
     try:
         pemesanan = Pemesanan.objects.select_related('pelanggan', 'tiket__jadwal__rute', 'tiket__jadwal__bus').get(pk=id_pemesanan)
-        pembayaran = Pembayaran.objects.filter(pelanggan=pemesanan.pelanggan).first()
+        pembayaran = Pembayaran.objects.filter(order_id__icontains=f"GM-{id_pemesanan}-").last()
     except Pemesanan.DoesNotExist:
         messages.error(request, "Transaksi tidak ditemukan.")
         return redirect('public_home')

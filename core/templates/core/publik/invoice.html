@@ -249,13 +249,7 @@
             </div>
             <div class="col-3 detail-item">
                 <span class="detail-label d-block">Metode Pembayaran</span>
-                <span class="detail-value">
-                    {% if pembayaran.metode_bayar == 'Cash' %}
-                        Cash / Tunai
-                    {% else %}
-                        Transfer Bank
-                    {% endif %}
-                </span>
+                <span class="detail-value">Online Payment</span>
             </div>
             <div class="col-3 detail-item text-end">
                 <span class="detail-label d-block">Total Pembayaran</span>
@@ -280,11 +274,20 @@
     var payButton = document.getElementById('pay-button');
     if (payButton) {
         payButton.addEventListener('click', function () {
-            snap.pay('{{ pembayaran.snap_token }}', {
-                onSuccess: function(result){ window.location.reload(); },
-                onPending: function(result){ window.location.reload(); },
-                onError: function(result){ alert("Pembayaran gagal!"); },
-                onClose: function(){ console.log('customer closed the popup without finishing the payment'); }
+            window.snap.pay('{{ pembayaran.snap_token }}', {
+                onSuccess: function(result){
+                    alert("Pembayaran berhasil!"); console.log(result);
+                    window.location.href = "{% url 'public_invoice' pemesanan.id_pemesanan %}";
+                },
+                onPending: function(result){
+                    alert("Menunggu pembayaran Anda!"); console.log(result);
+                },
+                onError: function(result){
+                    alert("Pembayaran gagal!"); console.log(result);
+                },
+                onClose: function(){
+                    alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                }
             });
         });
     }
