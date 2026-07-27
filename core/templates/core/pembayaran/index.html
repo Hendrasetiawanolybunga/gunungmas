@@ -22,7 +22,6 @@
                     <tr>
                         <th class="py-3 ps-4" style="width: 80px;">NO</th>
                         <th class="py-3">NAMA PELANGGAN</th>
-                        <th class="py-3">METODE PEMBAYARAN</th>
                         <th class="py-3">NOMINAL BAYAR</th>
                         <th class="py-3">BUKTI TRANSFER</th>
                         <th class="py-3">STATUS</th>
@@ -35,17 +34,6 @@
                             <tr>
                                 <td class="ps-4 fw-semibold text-secondary">{{ forloop.counter }}</td>
                                 <td class="fw-bold">{{ p.pelanggan.nama_pelanggan }}</td>
-                                <td>
-                                    {% if p.metode_bayar == 'Cash' %}
-                                        <span class="badge bg-light text-dark border border-secondary-subtle px-2.5 py-1.5 fw-semibold font-monospace">
-                                            <i class="fa-solid fa-money-bill-wave text-success me-1"></i> Cash / Tunai
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-light text-dark border border-secondary-subtle px-2.5 py-1.5 fw-semibold font-monospace">
-                                            <i class="fa-solid fa-building-columns text-primary me-1"></i> Transfer Bank
-                                        </span>
-                                    {% endif %}
-                                </td>
                                 <td class="fw-bold font-monospace">Rp {{ p.jumlah_bayar|intcomma }}</td>
                                 <td>
                                     {% if p.bukti_bayar %}
