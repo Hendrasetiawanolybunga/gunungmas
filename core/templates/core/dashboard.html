@@ -304,6 +304,11 @@
                                     Pelanggan <strong>{{ pesan.pelanggan.nama_pelanggan }}</strong> memesan {{ pesan.jumlah_tiket }} tiket untuk rute 
                                     <strong>{{ pesan.tiket.jadwal.rute.kota_asal }} - {{ pesan.tiket.jadwal.rute.kota_tujuan }}</strong>.
                                 </p>
+                                <div class="mt-1">
+                                    <span class="badge {% if pesan.status_hadir == 'Sudah di Bus' %}bg-success{% else %}bg-warning text-dark{% endif %}" style="font-size: 11px;">
+                                        {{ pesan.status_hadir }}
+                                    </span>
+                                </div>
                             </div>
                             <span class="activity-time font-monospace text-secondary">{{ pesan.tanggal_pesan|date:"d M Y" }}</span>
                         </li>

@@ -1,23 +1,16 @@
 {% extends 'core/base_dashboard.html' %}
-
-{% block title %}Scanner Tiket - PO Gunung Mas{% endblock %}
-
-{% block header_title %}Scanner Tiket Web{% endblock %}
-
+{% block title %}Scan Tiket Penumpang{% endblock %}
 {% block content %}
+<div class="mb-4">
+    <h4 class="fw-bold text-dark mb-1">Scan Tiket Keberangkatan</h4>
+    <p class="text-secondary small mb-0">Arahkan kamera ke QR Code E-Tiket penumpang untuk memvalidasi manifest.</p>
+</div>
+
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4 text-center">
-                <h5 class="fw-bold mb-3"><i class="fa-solid fa-qrcode text-primary"></i> Pindai QR Code Tiket</h5>
-                <p class="text-muted small mb-4">Arahkan kamera ke QR Code tiket penumpang untuk verifikasi.</p>
-                
-                <div id="reader" style="width: 100%; max-width: 500px; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0;"></div>
-                
-                <div id="result-container" class="mt-4 text-start d-none">
-                    <div class="alert alert-info rounded-3" id="result-message"></div>
-                </div>
-            </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+            <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; background: #fafafa;"></div>
+            <div id="result" class="mt-3 fw-bold"></div>
         </div>
     </div>
 </div>
@@ -25,91 +18,42 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    function onScanSuccess(decodedText, decodedResult) {
+        html5QrcodeScanner.clear();
+        document.getElementById('result').innerHTML = '<span class="text-primary">Memverifikasi kode tiket...</span>';
         
-        let isScanning = false;
-        
-        function onScanSuccess(decodedText, decodedResult) {
-            if (isScanning) return; // Prevent multiple scans at once
-            isScanning = true;
-            
-            // Hentikan scanner sementara
-            html5QrCode.pause();
-            
-            Swal.fire({
-                title: 'Memverifikasi...',
-                text: 'Sedang mengecek data tiket ke server',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
-            fetch("{% url 'api_verify_qr' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ qr_text: decodedText })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Tiket Valid!',
-                        html: `
-                            <b>ID Pemesanan:</b> GM-${data.id_pemesanan}<br>
-                            <b>Nama:</b> ${data.nama_pelanggan}<br>
-                            <b>No. Kursi:</b> ${data.nomor_kursi}
-                        `,
-                        confirmButtonText: 'Scan Lagi'
-                    }).then(() => {
-                        isScanning = false;
-                        html5QrCode.resume();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Tiket Ditolak!',
-                        text: data.message,
-                        confirmButtonText: 'Tutup'
-                    }).then(() => {
-                        isScanning = false;
-                        html5QrCode.resume();
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        fetch("{% url 'api_verify_qr' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ qr_text: decodedText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tiket Valid!',
+                    html: `<strong>Penumpang:</strong> ${data.nama_pelanggan}<br><strong>Kursi:</strong> ${data.nomor_kursi}<br><strong>Status:</strong> Sudah di Bus`,
+                    confirmButtonColor: '#4f46e5'
+                }).then(() => { location.reload(); });
+            } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Kesalahan Sistem',
-                    text: 'Gagal terhubung ke server verifikasi.',
-                    confirmButtonText: 'Tutup'
-                }).then(() => {
-                    isScanning = false;
-                    html5QrCode.resume();
-                });
-            });
-        }
-
-        function onScanFailure(error) {
-            // handle scan failure, usually better to ignore and keep scanning
-        }
-
-        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+                    title: 'Gagal',
+                    text: data.message,
+                    confirmButtonColor: '#ef4444'
+                }).then(() => { location.reload(); });
+            }
+        })
         .catch(err => {
-            console.error("Gagal memulai scanner:", err);
-            document.getElementById('reader').innerHTML = `
-                <div class="alert alert-danger m-3">
-                    <i class="fa-solid fa-camera-slash mb-2 fs-3"></i><br>
-                    Gagal mengakses kamera. Pastikan Anda memberikan izin akses kamera pada browser.
-                </div>
-            `;
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan sistem.' });
         });
-    });
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
 </script>
 {% endblock %}
