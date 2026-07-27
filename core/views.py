@@ -280,12 +280,14 @@ def sopir_add(request):
         nama_sopir = request.POST.get('nama_sopir')
         nomor_lisensi = request.POST.get('nomor_lisensi')
         nomor_telepon = request.POST.get('nomor_telepon')
+        password = request.POST.get('password')
         status_tugas = request.POST.get('status_tugas', 'Tersedia')
         
         Sopir.objects.create(
             nama_sopir=nama_sopir,
             nomor_lisensi=nomor_lisensi,
             nomor_telepon=nomor_telepon,
+            password=password,
             status_tugas=status_tugas
         )
         messages.success(request, f"Sopir {nama_sopir} berhasil ditambahkan!")
@@ -308,6 +310,11 @@ def sopir_edit(request, id_sopir):
         sopir.nomor_lisensi = request.POST.get('nomor_lisensi')
         sopir.nomor_telepon = request.POST.get('nomor_telepon')
         sopir.status_tugas = request.POST.get('status_tugas')
+        
+        password = request.POST.get('password')
+        if password:
+            sopir.password = password
+            
         sopir.save()
         messages.success(request, f"Data sopir {sopir.nama_sopir} berhasil diperbarui!")
         return redirect('sopir_index')
