@@ -1288,31 +1288,40 @@ def midtrans_webhook(request):
                 pembayaran.status = 'Lunas'
                 pembayaran.save()
                 
-                # Ambil pemesanan terkait (cari via order_id yang formatnya GM-{id_pemesanan}-...)
                 try:
-                    id_pesan = pembayaran.order_id.split('-')[1]
-                    pemesanan = Pemesanan.objects.get(pk=id_pesan)
-                    
-                    # Buat pesan rahasia
-                    pesan_asli = f"VALID|{pemesanan.id_pemesanan}|{pemesanan.pelanggan.nama_pelanggan}|{pemesanan.nomor_kursi}|Bagasi:{pemesanan.layanan_bagasi}".encode()
-                    
-                    # Enkripsi pesan
-                    f = Fernet(settings.TICKET_CRYPT_KEY)
-                    pesan_enkripsi = f.encrypt(pesan_asli)
-                    
-                    # Buat QR Code
-                    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-                    qr.add_data(pesan_enkripsi.decode('utf-8'))
-                    qr.make(fit=True)
-                    img = qr.make_image(fill='black', back_color='white')
-                    
-                    # Simpan ke model
-                    buffer = BytesIO()
-                    img.save(buffer, format="PNG")
-                    file_name = f'qr_ticket_{pemesanan.id_pemesanan}.png'
-                    pemesanan.qr_code.save(file_name, File(buffer), save=True)
-                except Exception as e:
-                    print("Gagal generate QR:", e)
+                    # Proteksi pembacaan order_id format: GM-{id_pemesanan}-{timestamp}
+                    order_parts = pembayaran.order_id.split('-')
+                    if len(order_parts) >= 2:
+                        id_pesan = order_parts[1]
+                        pemesanan = Pemesanan.objects.select_related('pelanggan', 'tiket__jadwal__rute', 'tiket__jadwal__bus').get(pk=id_pesan)
+                        
+                        # Gabungkan semua data manifest termasuk status layanan_bagasi secara eksplisit
+                        status_bagasi_str = "Ya" if pemesanan.layanan_bagasi else "Tidak"
+                        kursi_str = pemesanan.nomor_kursi if pemesanan.nomor_kursi else "-"
+                        
+                        pesan_raw = f"VALID|{pemesanan.id_pemesanan}|{pemesanan.pelanggan.nama_pelanggan}|{kursi_str}|Bagasi:{status_bagasi_str}"
+                        pesan_asli = pesan_raw.encode('utf-8')
+                        
+                        # Proses Enkripsi QR Code menggunakan kunci dari settings
+                        f = Fernet(settings.TICKET_CRYPT_KEY)
+                        pesan_enkripsi = f.encrypt(pesan_asli)
+                        
+                        # Pembuatan berkas QR Code PNG
+                        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                        qr.add_data(pesan_enkripsi.decode('utf-8'))
+                        qr.make(fit=True)
+                        img = qr.make_image(fill='black', back_color='white')
+                        
+                        buffer = BytesIO()
+                        img.save(buffer, format="PNG")
+                        file_name = f'qr_ticket_{pemesanan.id_pemesanan}.png'
+                        
+                        # Simpan QR Code ke media storage
+                        if pemesanan.qr_code:
+                            pemesanan.qr_code.delete(save=False)
+                        pemesanan.qr_code.save(file_name, File(buffer), save=True)
+                except Exception as qr_err:
+                    print("Gagal generate QR terenkripsi di Webhook:", str(qr_err))
             elif transaction_status in ['deny', 'cancel', 'expire']:
                 pembayaran.status = 'Dibatalkan'
                 pembayaran.save()
@@ -1349,15 +1358,13 @@ def api_verify_qr(request):
             parts = decrypted.split('|')
             if len(parts) >= 4 and parts[0] == 'VALID':
                 id_pemesanan = parts[1]
-                
-                # Ambil data pemesanan dari database
                 pemesanan = Pemesanan.objects.get(pk=id_pemesanan)
                 
-                # Ubah status kehadiran menjadi 'Sudah di Bus'
                 pemesanan.status_hadir = 'Sudah di Bus'
                 pemesanan.save()
                 
-                info_bagasi = parts[4] if len(parts) == 5 else "Bagasi: False"
+                # Baca parameter ke-5 jika ada, jika tidak pakai nilai fallback aman
+                info_bagasi = parts[4] if len(parts) >= 5 else "Bagasi: Tidak"
                 
                 return JsonResponse({
                     'status': 'success',
