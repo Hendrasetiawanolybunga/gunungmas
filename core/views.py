@@ -829,17 +829,21 @@ def public_checkout(request, id_tiket):
         jumlah_tiket = int(request.POST.get('jumlah_tiket', 1))
         metode_bayar = 'Online'
         nomor_kursi = request.POST.get('nomor_kursi')
+        pakai_bagasi = request.POST.get('layanan_bagasi') == 'yes'
         
         # a. Buat record Pemesanan baru menggunakan pelanggan yang login
         pemesanan = Pemesanan.objects.create(
             pelanggan=pelanggan,
             tiket=tiket,
             jumlah_tiket=jumlah_tiket,
-            nomor_kursi=nomor_kursi
+            nomor_kursi=nomor_kursi,
+            layanan_bagasi=pakai_bagasi
         )
         
         # b. Hitung total bayar dan buat record Pembayaran baru (Pending)
-        total_bayar = jumlah_tiket * tiket.harga_tiket
+        biaya_dasar = jumlah_tiket * tiket.harga_tiket
+        biaya_bagasi = 50000 if pakai_bagasi else 0
+        total_bayar = biaya_dasar + biaya_bagasi
         status_default = 'Pending'
         order_id = f"GM-{pemesanan.id_pemesanan}-{int(time.time())}"
         
@@ -1290,7 +1294,7 @@ def midtrans_webhook(request):
                     pemesanan = Pemesanan.objects.get(pk=id_pesan)
                     
                     # Buat pesan rahasia
-                    pesan_asli = f"VALID|{pemesanan.id_pemesanan}|{pemesanan.pelanggan.nama_pelanggan}|{pemesanan.nomor_kursi}".encode()
+                    pesan_asli = f"VALID|{pemesanan.id_pemesanan}|{pemesanan.pelanggan.nama_pelanggan}|{pemesanan.nomor_kursi}|Bagasi:{pemesanan.layanan_bagasi}".encode()
                     
                     # Enkripsi pesan
                     f = Fernet(settings.TICKET_CRYPT_KEY)

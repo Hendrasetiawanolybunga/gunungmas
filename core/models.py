@@ -79,6 +79,7 @@ class Pemesanan(models.Model):
     tanggal_pesan = models.DateField(auto_now_add=True)
     jumlah_tiket = models.IntegerField(default=1)
     bagasi = models.IntegerField(default=0) # Berat dalam Kg atau status bagasi
+    layanan_bagasi = models.BooleanField(default=False)
     nomor_kursi = models.CharField(max_length=50, blank=True, null=True)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
