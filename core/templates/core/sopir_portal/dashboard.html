@@ -18,10 +18,13 @@
 <body>
     <div class="header d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h5 class="fw-bold mb-0">Kapten {{ request.session.sopir_nama }}</h5>
-            <small class="opacity-75">{% if bus %}{{ bus.nama_bus }} ({{ bus.nomor_polisi }}){% else %}Belum ada bus{% endif %}</small>
+            <h5 class="fw-bold mb-0">Sopir: {{ request.session.sopir_nama }}</h5>
+            <small class="opacity-75">Sistem Manajemen PO Gunung Mas</small>
         </div>
-        <a href="{% url 'sopir_logout' %}" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="fa-solid fa-right-from-bracket me-1"></i> Keluar</a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'sopir_profil' %}" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="fa-solid fa-user-gear me-1"></i> Kelola Akun</a>
+            <a href="{% url 'sopir_logout' %}" class="btn btn-sm btn-danger rounded-pill px-3"><i class="fa-solid fa-right-from-bracket me-1"></i> Keluar</a>
+        </div>
     </div>
 
     <div class="container">
@@ -37,18 +40,24 @@
             <div class="col-6">
                 <div class="card card-custom h-100">
                     <div class="card-body text-center p-4">
-                        <i class="fa-solid fa-users text-primary fs-1 mb-2"></i>
-                        <h2 class="fw-bold text-dark mb-0">{{ total_tiket }}</h2>
-                        <small class="text-muted">Total Tiket Terjual</small>
+                        <i class="fa-solid fa-bus text-primary fs-1 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">{% if bus %}{{ bus.nama_bus }} | {{ bus.nomor_polisi }}{% else %}-{% endif %}</h6>
+                        <small class="text-muted">Armada Bus & No. Polisi</small>
                     </div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="card card-custom h-100">
                     <div class="card-body text-center p-4">
-                        <i class="fa-solid fa-calendar-check text-success fs-1 mb-2"></i>
-                        <h2 class="fw-bold text-dark mb-0">{{ jadwal_aktif|length }}</h2>
-                        <small class="text-muted">Jadwal Aktif</small>
+                        <i class="fa-solid fa-route text-success fs-1 mb-2"></i>
+                        <h6 class="fw-bold text-dark mb-0">
+                            {% if jadwal_aktif %}
+                                {{ jadwal_aktif.0.rute.kota_asal }} - {{ jadwal_aktif.0.rute.kota_tujuan }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </h6>
+                        <small class="text-muted">Trayek Utama</small>
                     </div>
                 </div>
             </div>
@@ -61,6 +70,11 @@
         </div>
 
     </div>
+
+    <footer class="text-center py-4 mt-5 text-secondary border-top small" style="font-size: 12px;">
+        <div id="jam-digital-sopir" class="fw-bold text-primary mb-1"><i class="fa-solid fa-clock me-1"></i> 00:00:00 WITA</div>
+        <div>&copy; 2026 PO Gunung Mas Ruteng | Powered by coderNTT</div>
+    </footer>
 
     <!-- Modal Scanner -->
     <div class="modal fade" id="scanModal" tabindex="-1" aria-hidden="true">
@@ -136,6 +150,12 @@
             }
             html5QrcodeScanner.render(onScanSuccess);
         }
+
+        setInterval(() => {
+            const timeOptions = { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const timeString = new Date().toLocaleTimeString('id-ID', timeOptions);
+            document.getElementById('jam-digital-sopir').innerHTML = `<i class="fa-solid fa-clock me-1"></i> ${timeString} WITA`;
+        }, 1000);
     </script>
 </body>
 </html>

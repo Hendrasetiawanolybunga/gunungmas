@@ -89,4 +89,5 @@ urlpatterns = [
     path('sopir/login/', views.sopir_login_view, name='sopir_login'),
     path('sopir/logout/', views.sopir_logout_view, name='sopir_logout'),
     path('sopir/dashboard/', views.sopir_dashboard, name='sopir_dashboard'),
+    path('sopir/profil/', views.sopir_profil_view, name='sopir_profil'),
 ]

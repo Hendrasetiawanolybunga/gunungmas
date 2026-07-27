@@ -1367,10 +1367,17 @@ def api_verify_qr(request):
                 id_pemesanan = parts[1]
                 pemesanan = Pemesanan.objects.get(pk=id_pemesanan)
                 
+                # CRITICAL SECURITY LOCK: Cek apakah tiket sudah pernah di-scan sebelumnya
+                if pemesanan.status_hadir == 'Sudah di Bus':
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Gagal! Tiket ini sudah pernah dipindai sebelumnya dan penumpang sudah berada di dalam bus.'
+                    })
+                
+                # Jika lolos sensor keamanan, ubah status menjadi Sudah di Bus
                 pemesanan.status_hadir = 'Sudah di Bus'
                 pemesanan.save()
                 
-                # Baca parameter ke-5 jika ada, jika tidak pakai nilai fallback aman
                 info_bagasi = parts[4] if len(parts) >= 5 else "Bagasi: Tidak"
                 
                 return JsonResponse({
@@ -1383,9 +1390,9 @@ def api_verify_qr(request):
                     'status_hadir': pemesanan.status_hadir
                 })
             else:
-                return JsonResponse({'status': 'error', 'message': 'Format tiket tidak valid.'})
+                return JsonResponse({'status': 'error', 'message': 'Format data kode tiket tidak valid.'})
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': 'Tiket Palsu atau Tidak Dikenali.'})
+            return JsonResponse({'status': 'error', 'message': 'Tiket Palsu, Kadaluwarsa, atau Tidak Dikenali.'})
     return JsonResponse({'status': 'error', 'message': 'Method Not Allowed'})
 
 def sopir_login_view(request):
@@ -1439,3 +1446,18 @@ def sopir_dashboard(request):
         'total_tiket': total_tiket
     }
     return render(request, 'core/sopir_portal/dashboard.html', context)
+
+def sopir_profil_view(request):
+    if 'sopir_id' not in request.session:
+        return redirect('sopir_login')
+    sopir = Sopir.objects.get(pk=request.session['sopir_id'])
+    if request.method == 'POST':
+        sopir.nama_sopir = request.POST.get('nama_sopir')
+        sopir.nomor_telepon = request.POST.get('nomor_telepon')
+        if request.POST.get('password'):
+            sopir.password = request.POST.get('password')
+        sopir.save()
+        request.session['sopir_nama'] = sopir.nama_sopir
+        messages.success(request, "Profil dan password Anda berhasil diperbarui!")
+        return redirect('sopir_dashboard')
+    return render(request, 'core/sopir_portal/profil.html', {'sopir': sopir})
