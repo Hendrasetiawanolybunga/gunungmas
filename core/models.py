@@ -35,6 +35,7 @@ class Sopir(models.Model):
     nama_sopir = models.CharField(max_length=100)
     nomor_lisensi = models.CharField(max_length=30) # No SIM
     nomor_telepon = models.CharField(max_length=15)
+    password = models.CharField(max_length=255, null=True, blank=True)
     status_tugas = models.CharField(max_length=20, default='Tersedia') # Tersedia, Bertugas
 
     def __str__(self):

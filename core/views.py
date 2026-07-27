@@ -1373,3 +1373,55 @@ def api_verify_qr(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': 'Tiket Palsu atau Tidak Dikenali.'})
     return JsonResponse({'status': 'error', 'message': 'Method Not Allowed'})
+
+def sopir_login_view(request):
+    if 'sopir_id' in request.session:
+        return redirect('sopir_dashboard')
+    if request.method == 'POST':
+        lisensi = request.POST.get('nomor_lisensi')
+        pwd = request.POST.get('password')
+        try:
+            sopir = Sopir.objects.get(nomor_lisensi=lisensi, password=pwd)
+            request.session['sopir_id'] = sopir.id_sopir
+            request.session['sopir_nama'] = sopir.nama_sopir
+            messages.success(request, f"Selamat bertugas, Kapten {sopir.nama_sopir}!")
+            return redirect('sopir_dashboard')
+        except Sopir.DoesNotExist:
+            messages.error(request, "Nomor lisensi (SIM) atau password salah!")
+    return render(request, 'core/sopir_portal/login.html')
+
+def sopir_logout_view(request):
+    request.session.pop('sopir_id', None)
+    request.session.pop('sopir_nama', None)
+    messages.success(request, "Berhasil keluar dari sistem portal sopir.")
+    return redirect('sopir_login')
+
+def sopir_dashboard(request):
+    if 'sopir_id' not in request.session:
+        messages.error(request, "Silakan login terlebih dahulu.")
+        return redirect('sopir_login')
+    
+    sopir_id = request.session['sopir_id']
+    bus = Bus.objects.filter(sopir_id=sopir_id).first()
+    
+    jadwal_aktif = []
+    total_tiket = 0
+    if bus:
+        from datetime import date
+        jadwal_aktif = Jadwal.objects.filter(bus=bus, tanggal_berangkat__gte=date.today()).order_by('tanggal_berangkat', 'jam_berangkat')
+        
+        # Hitung tiket terjual untuk jadwal-jadwal tersebut
+        jadwal_ids = [j.id_jadwal for j in jadwal_aktif]
+        if jadwal_ids:
+            pemesanan_lunas = Pemesanan.objects.filter(
+                tiket__jadwal__in=jadwal_ids,
+                pembayaran__status='Lunas'
+            ).distinct()
+            total_tiket = sum(p.jumlah_tiket for p in pemesanan_lunas)
+            
+    context = {
+        'bus': bus,
+        'jadwal_aktif': jadwal_aktif,
+        'total_tiket': total_tiket
+    }
+    return render(request, 'core/sopir_portal/dashboard.html', context)

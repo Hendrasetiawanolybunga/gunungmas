@@ -84,4 +84,9 @@ urlpatterns = [
     # Scanner Loket
     path('dashboard/scan/', views.admin_scan_tiket, name='admin_scan_tiket'),
     path('api/verify-qr/', views.api_verify_qr, name='api_verify_qr'),
+
+    # Portal Sopir
+    path('sopir/login/', views.sopir_login_view, name='sopir_login'),
+    path('sopir/logout/', views.sopir_logout_view, name='sopir_logout'),
+    path('sopir/dashboard/', views.sopir_dashboard, name='sopir_dashboard'),
 ]

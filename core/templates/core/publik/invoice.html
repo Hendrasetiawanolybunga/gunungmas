@@ -173,12 +173,6 @@
                     <span class="status-badge-invoice status-paid">
                         <i class="fa-solid fa-circle-check me-1.5"></i> LUNAS
                     </span>
-                    {% if pemesanan.qr_code %}
-                        <div class="text-center my-3">
-                            <p class="text-muted mb-1" style="font-size: 12px;">Pindai QR ini di Loket Keberangkatan</p>
-                            <img src="{{ pemesanan.qr_code.url }}" alt="Secure QR Ticket" style="width: 150px; height: 150px; border: 2px solid #ddd; padding: 5px; border-radius: 10px;">
-                        </div>
-                    {% endif %}
                 {% else %}
                     <span class="status-badge-invoice status-unpaid">
                         <i class="fa-solid fa-circle-exclamation me-1.5"></i> {{ pembayaran.status|upper }}
@@ -245,23 +239,25 @@
             </div>
             <div class="col-3 detail-item">
                 <span class="detail-label d-block">Nomor Kursi</span>
-                <span class="detail-value font-monospace">
-                    {% if pemesanan.nomor_kursi %}
-                        {{ pemesanan.nomor_kursi }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </span>
+                <span class="detail-value font-monospace">{% if pemesanan.nomor_kursi %}{{ pemesanan.nomor_kursi }}{% else %}-{% endif %}</span>
             </div>
             <div class="col-3 detail-item">
-                <span class="detail-label d-block">Metode Pembayaran</span>
-                <span class="detail-value">Online Payment</span>
+                <span class="detail-label d-block">Layanan Bagasi</span>
+                <span class="detail-value">{% if pemesanan.layanan_bagasi %}<span class="text-success fw-bold"><i class="fa-solid fa-briefcase"></i> Ya (+Rp50k)</span>{% else %}<span class="text-muted">Tidak</span>{% endif %}</span>
             </div>
             <div class="col-3 detail-item text-end">
                 <span class="detail-label d-block">Total Pembayaran</span>
                 <span class="fs-5 fw-bold text-primary font-monospace">Rp {{ pembayaran.jumlah_bayar|floatformat:"0" }}</span>
             </div>
         </div>
+
+        {% if pembayaran.status == 'Lunas' and pemesanan.qr_code %}
+            <div class="text-center my-4 py-3 border-top border-bottom bg-light rounded-3">
+                <p class="text-dark fw-bold mb-2" style="font-size: 14px;"><i class="fa-solid fa-shield-halved text-primary me-1"></i> E-Tiket Resmi PO Gunung Mas</p>
+                <img src="{{ pemesanan.qr_code.url }}" alt="Secure QR Ticket" style="width: 200px; height: 200px; border: 3px solid #4f46e5; padding: 8px; background: #fff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <p class="text-muted mt-2 mb-0" style="font-size: 11px;">Tunjukkan QR Code ini kepada petugas loket atau sopir saat menaiki bus untuk boarding.</p>
+            </div>
+        {% endif %}
 
         <!-- Notes / Instructions -->
         <div class="bg-light rounded-3 p-3 border text-secondary small" style="font-size: 12px;">
