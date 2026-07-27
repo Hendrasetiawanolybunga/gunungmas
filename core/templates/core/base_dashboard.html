@@ -395,6 +395,13 @@
                     <span>Pembayaran</span>
                 </a>
             </li>
+            
+            <li class="sidebar-item">
+                <a href="{% url 'admin_scan_tiket' %}" class="sidebar-link {% if 'scan' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fa-solid fa-camera-rotate"></i>
+                    <span>Scan Tiket Masuk</span>
+                </a>
+            </li>
 
             <!-- Dropdown Laporan Sistem -->
             <li class="sidebar-item">

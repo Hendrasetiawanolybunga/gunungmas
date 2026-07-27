@@ -25,6 +25,7 @@
                         <th class="py-3 text-center">JUMLAH TIKET</th>
                         <th class="py-3">NOMOR KURSI</th>
                         <th class="py-3">TANGGAL PESAN</th>
+                        <th class="py-3">STATUS HADIR</th>
                         <th class="py-3 pe-4 text-center" style="width: 200px;">AKSI</th>
                     </tr>
                 </thead>
@@ -59,6 +60,9 @@
                                     <span class="badge bg-light text-dark border border-secondary-subtle px-2.5 py-1.5 font-monospace">
                                         <i class="fa-regular fa-clock me-1 text-muted"></i> {{ p.tanggal_pesan|date:"d M Y" }}
                                     </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if p.status_hadir == 'Sudah di Bus' %}bg-success{% else %}bg-warning{% endif %}">{{ p.status_hadir }}</span>
                                 </td>
                                 <td class="pe-4 text-center">
                                     <div class="d-flex justify-content-center gap-2">

@@ -1327,13 +1327,19 @@ def midtrans_webhook(request):
 def admin_scan_tiket(request):
     if 'admin_id' not in request.session:
         messages.error(request, "Silakan login terlebih dahulu.")
-        return redirect('admin_login')
+        return redirect('login')
     return render(request, 'core/admin/scanner.html')
 
 @csrf_exempt
 def api_verify_qr(request):
     if request.method == 'POST':
         try:
+            import json
+            from django.http import JsonResponse
+            from django.conf import settings
+            from cryptography.fernet import Fernet
+            from .models import Pemesanan
+
             data = json.loads(request.body)
             qr_text = data.get('qr_text')
             
@@ -1341,13 +1347,26 @@ def api_verify_qr(request):
             decrypted = f.decrypt(qr_text.encode('utf-8')).decode('utf-8')
             
             parts = decrypted.split('|')
-            if len(parts) == 4 and parts[0] == 'VALID':
+            if len(parts) >= 4 and parts[0] == 'VALID':
+                id_pemesanan = parts[1]
+                
+                # Ambil data pemesanan dari database
+                pemesanan = Pemesanan.objects.get(pk=id_pemesanan)
+                
+                # Ubah status kehadiran menjadi 'Sudah di Bus'
+                pemesanan.status_hadir = 'Sudah di Bus'
+                pemesanan.save()
+                
+                info_bagasi = parts[4] if len(parts) == 5 else "Bagasi: False"
+                
                 return JsonResponse({
                     'status': 'success',
-                    'message': 'Tiket Valid',
-                    'id_pemesanan': parts[1],
+                    'message': 'Tiket Valid & Penumpang Berhasil Boarding!',
+                    'id_pemesanan': id_pemesanan,
                     'nama_pelanggan': parts[2],
-                    'nomor_kursi': parts[3]
+                    'nomor_kursi': parts[3],
+                    'bagasi': info_bagasi,
+                    'status_hadir': pemesanan.status_hadir
                 })
             else:
                 return JsonResponse({'status': 'error', 'message': 'Format tiket tidak valid.'})

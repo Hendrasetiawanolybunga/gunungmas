@@ -81,6 +81,7 @@ class Pemesanan(models.Model):
     bagasi = models.IntegerField(default=0) # Berat dalam Kg atau status bagasi
     layanan_bagasi = models.BooleanField(default=False)
     nomor_kursi = models.CharField(max_length=50, blank=True, null=True)
+    status_hadir = models.CharField(max_length=20, default='Belum Hadir')
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
     def __str__(self):
