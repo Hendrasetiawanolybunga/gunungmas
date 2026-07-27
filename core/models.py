@@ -80,6 +80,7 @@ class Pemesanan(models.Model):
     jumlah_tiket = models.IntegerField(default=1)
     bagasi = models.IntegerField(default=0) # Berat dalam Kg atau status bagasi
     nomor_kursi = models.CharField(max_length=50, blank=True, null=True)
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
     def __str__(self):
         return f"Pemesanan #{self.id_pemesanan} oleh {self.pelanggan.nama_pelanggan}"

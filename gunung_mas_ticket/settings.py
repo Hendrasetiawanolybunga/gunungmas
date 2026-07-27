@@ -132,3 +132,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MIDTRANS_SERVER_KEY = 'Mid-server-3fV9M5cZheTNMgRr1RKBZQKu'
 MIDTRANS_CLIENT_KEY = 'Mid-client-uZI1huhpIUNEm7vX'
 MIDTRANS_IS_PRODUCTION = False
+
+# Kunci rahasia 32-url-safe-base64-encoded untuk Kriptografi Tiket
+TICKET_CRYPT_KEY = b'wzO_nE7gN1Y4Q9jD5s_v2L6U3zP8mR-X5tC4vB1yA9o='

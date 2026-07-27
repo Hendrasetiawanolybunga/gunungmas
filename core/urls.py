@@ -80,4 +80,8 @@ urlpatterns = [
 
     # Fitur Unduh PDF (xhtml2pdf)
     path('dashboard/laporan/unduh/<str:jenis_laporan>/', views.laporan_unduh_pdf, name='laporan_unduh_pdf'),
+    
+    # Scanner Loket
+    path('dashboard/scan/', views.admin_scan_tiket, name='admin_scan_tiket'),
+    path('api/verify-qr/', views.api_verify_qr, name='api_verify_qr'),
 ]

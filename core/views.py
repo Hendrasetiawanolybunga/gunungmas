@@ -12,6 +12,10 @@ from django.db import transaction
 import json
 import time
 import midtransclient
+import qrcode
+from cryptography.fernet import Fernet
+from django.core.files import File
+from django.http import JsonResponse
 
 
 def login_view(request):
@@ -1278,13 +1282,71 @@ def midtrans_webhook(request):
             
             if transaction_status in ['capture', 'settlement']:
                 pembayaran.status = 'Lunas'
+                pembayaran.save()
+                
+                # Ambil pemesanan terkait (cari via order_id yang formatnya GM-{id_pemesanan}-...)
+                try:
+                    id_pesan = pembayaran.order_id.split('-')[1]
+                    pemesanan = Pemesanan.objects.get(pk=id_pesan)
+                    
+                    # Buat pesan rahasia
+                    pesan_asli = f"VALID|{pemesanan.id_pemesanan}|{pemesanan.pelanggan.nama_pelanggan}|{pemesanan.nomor_kursi}".encode()
+                    
+                    # Enkripsi pesan
+                    f = Fernet(settings.TICKET_CRYPT_KEY)
+                    pesan_enkripsi = f.encrypt(pesan_asli)
+                    
+                    # Buat QR Code
+                    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                    qr.add_data(pesan_enkripsi.decode('utf-8'))
+                    qr.make(fit=True)
+                    img = qr.make_image(fill='black', back_color='white')
+                    
+                    # Simpan ke model
+                    buffer = BytesIO()
+                    img.save(buffer, format="PNG")
+                    file_name = f'qr_ticket_{pemesanan.id_pemesanan}.png'
+                    pemesanan.qr_code.save(file_name, File(buffer), save=True)
+                except Exception as e:
+                    print("Gagal generate QR:", e)
             elif transaction_status in ['deny', 'cancel', 'expire']:
                 pembayaran.status = 'Dibatalkan'
+                pembayaran.save()
             elif transaction_status == 'pending':
                 pembayaran.status = 'Pending'
-                
-            pembayaran.save()
+                pembayaran.save()
             return HttpResponse("OK", status=200)
         except Exception as e:
             return HttpResponse(str(e), status=500)
     return HttpResponse("Method Not Allowed", status=405)
+
+def admin_scan_tiket(request):
+    if 'admin_id' not in request.session:
+        messages.error(request, "Silakan login terlebih dahulu.")
+        return redirect('admin_login')
+    return render(request, 'core/admin/scanner.html')
+
+@csrf_exempt
+def api_verify_qr(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            qr_text = data.get('qr_text')
+            
+            f = Fernet(settings.TICKET_CRYPT_KEY)
+            decrypted = f.decrypt(qr_text.encode('utf-8')).decode('utf-8')
+            
+            parts = decrypted.split('|')
+            if len(parts) == 4 and parts[0] == 'VALID':
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Tiket Valid',
+                    'id_pemesanan': parts[1],
+                    'nama_pelanggan': parts[2],
+                    'nomor_kursi': parts[3]
+                })
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Format tiket tidak valid.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Tiket Palsu atau Tidak Dikenali.'})
+    return JsonResponse({'status': 'error', 'message': 'Method Not Allowed'})
