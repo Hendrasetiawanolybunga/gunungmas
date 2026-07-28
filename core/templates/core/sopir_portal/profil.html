@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Profil Sopir - PO Gunung Mas</title>
+    <title>Kelola Akun Sopir - PO Gunung Mas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,59 +13,52 @@
         .card-custom { border: none; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
     </style>
 </head>
-<body>
-    <div class="header d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h5 class="fw-bold mb-0">Kelola Akun</h5>
-            <small class="opacity-75">Perbarui informasi profil dan kata sandi Anda</small>
-        </div>
-        <a href="{% url 'sopir_dashboard' %}" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="fa-solid fa-arrow-left me-1"></i> Kembali</a>
+<body class="d-flex flex-column min-vh-100">
+    <div class="header mb-5 text-center">
+        <h5 class="fw-bold mb-0">Kelola Akun & Keamanan</h5>
+        <small class="opacity-75">Portal Sopir PO Gunung Mas</small>
     </div>
 
-    <div class="container pb-5">
+    <div class="container flex-grow-1">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <div class="card card-custom">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-4">
-                            <div class="bg-light text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 32px;">
-                                <i class="fa-solid fa-user-tie"></i>
+                <div class="card card-custom p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Nama Lengkap (Sesuai KTP)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
+                                <input type="text" name="nama_sopir" class="form-control bg-light" value="{{ sopir.nama_sopir }}" required>
                             </div>
-                            <h5 class="fw-bold text-dark">{{ sopir.nama_sopir }}</h5>
-                            <p class="text-secondary small mb-0">Lisensi: {{ sopir.nomor_lisensi }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Nomor Telepon (WhatsApp Aktif)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fa-solid fa-phone text-muted"></i></span>
+                                <input type="text" name="nomor_telepon" class="form-control bg-light" value="{{ sopir.nomor_telepon }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-secondary">Ganti Password (Opsional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
+                                <input type="password" name="password" class="form-control bg-light" placeholder="Kosongkan jika tidak ingin mengubah password">
+                            </div>
                         </div>
                         
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small text-secondary">Nama Lengkap</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-user"></i></span>
-                                    <input type="text" name="nama_sopir" class="form-control border-start-0 ps-1" value="{{ sopir.nama_sopir }}" required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold small text-secondary">Nomor Telepon</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-phone"></i></span>
-                                    <input type="text" name="nomor_telepon" class="form-control border-start-0 ps-1" value="{{ sopir.nomor_telepon }}" required>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold small text-secondary">Password (Opsional)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-lock"></i></span>
-                                    <input type="password" name="password" class="form-control border-start-0 ps-1" placeholder="Isi untuk mengganti password baru">
-                                </div>
-                                <div class="form-text small text-muted">Kosongkan jika tidak ingin mengubah password saat ini.</div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan</button>
-                        </form>
-                    </div>
+                        <div class="d-flex justify-content-between gap-3 mt-4">
+                            <a href="{% url 'sopir_dashboard' %}" class="btn btn-light w-50 fw-bold rounded-pill text-muted border">Batal</a>
+                            <button type="submit" class="btn btn-primary w-50 fw-bold rounded-pill shadow-sm">Simpan Perubahan</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <footer class="text-center py-4 mt-auto text-secondary border-top small" style="font-size: 12px; background-color: #f8fafc;">
+        <div>&copy; 2026 PO Gunung Mas Ruteng | Powered by coderNTT</div>
+    </footer>
 </body>
 </html>

@@ -1367,14 +1367,14 @@ def api_verify_qr(request):
                 id_pemesanan = parts[1]
                 pemesanan = Pemesanan.objects.get(pk=id_pemesanan)
                 
-                # CRITICAL SECURITY LOCK: Cek apakah tiket sudah pernah di-scan sebelumnya
+                # CRITICAL LOCK: Tolak jika tiket sudah di-scan
                 if pemesanan.status_hadir == 'Sudah di Bus':
                     return JsonResponse({
                         'status': 'error',
-                        'message': 'Gagal! Tiket ini sudah pernah dipindai sebelumnya dan penumpang sudah berada di dalam bus.'
+                        'message': 'Gagal! Tiket ini sudah pernah dipindai dan penumpang telah berada di dalam bus.'
                     })
                 
-                # Jika lolos sensor keamanan, ubah status menjadi Sudah di Bus
+                # Jika valid perdana, ubah status
                 pemesanan.status_hadir = 'Sudah di Bus'
                 pemesanan.save()
                 
@@ -1450,14 +1450,20 @@ def sopir_dashboard(request):
 def sopir_profil_view(request):
     if 'sopir_id' not in request.session:
         return redirect('sopir_login')
+    
     sopir = Sopir.objects.get(pk=request.session['sopir_id'])
+    
     if request.method == 'POST':
         sopir.nama_sopir = request.POST.get('nama_sopir')
         sopir.nomor_telepon = request.POST.get('nomor_telepon')
-        if request.POST.get('password'):
-            sopir.password = request.POST.get('password')
+        password_baru = request.POST.get('password')
+        if password_baru:
+            sopir.password = password_baru
         sopir.save()
+        
         request.session['sopir_nama'] = sopir.nama_sopir
-        messages.success(request, "Profil dan password Anda berhasil diperbarui!")
+        from django.contrib import messages
+        messages.success(request, "Profil dan keamanan akun Anda berhasil diperbarui!")
         return redirect('sopir_dashboard')
+        
     return render(request, 'core/sopir_portal/profil.html', {'sopir': sopir})
