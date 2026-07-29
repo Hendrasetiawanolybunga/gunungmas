@@ -1,12 +1,12 @@
 {% extends 'core/publik/base_public.html' %}
-{% load humanize %}
+{% load humanize static %}
 
 {% block title %}Pemesanan Tiket Online - PO Gunung Mas{% endblock %}
 
 {% block content %}
 <style>
     .hero-section {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+        background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(49, 16, 66, 0.8)), url("{% static 'img/hero-img.jpeg' %}") center/cover no-repeat;
         padding: 100px 0 140px 0;
         color: #ffffff;
         position: relative;

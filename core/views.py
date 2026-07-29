@@ -543,6 +543,10 @@ def pelanggan_add(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         
+        if not nomor_telpon.isdigit():
+            messages.error(request, "Nomor HP gagal disimpan. Pastikan hanya mengandung angka!")
+            return redirect('pelanggan_add')
+        
         Pelanggan.objects.create(
             nama_pelanggan=nama_pelanggan,
             jenis_kelamin=jenis_kelamin,
@@ -570,7 +574,13 @@ def pelanggan_edit(request, id_pelanggan):
         pelanggan.nama_pelanggan = request.POST.get('nama_pelanggan')
         pelanggan.jenis_kelamin = request.POST.get('jenis_kelamin')
         pelanggan.alamat = request.POST.get('alamat')
-        pelanggan.nomor_telpon = request.POST.get('nomor_telpon')
+        nomor_telpon = request.POST.get('nomor_telpon')
+        
+        if not nomor_telpon.isdigit():
+            messages.error(request, "Nomor HP gagal disimpan. Pastikan hanya mengandung angka!")
+            return redirect('pelanggan_edit', id_pelanggan=id_pelanggan)
+            
+        pelanggan.nomor_telpon = nomor_telpon
         pelanggan.email = request.POST.get('email')
         pelanggan.password = request.POST.get('password')
         pelanggan.save()
