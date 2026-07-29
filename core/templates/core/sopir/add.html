@@ -44,8 +44,12 @@
                         <label for="nomor_telepon" class="form-label fw-semibold text-secondary" style="font-size: 13px;">Nomor Telepon</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light text-secondary border-end-0"><i class="fa-solid fa-phone"></i></span>
-                            <input type="text" name="nomor_telepon" id="nomor_telepon" class="form-control border-start-0 ps-1" placeholder="Contoh: 08123456789" required>
+                            <input type="tel" name="nomor_telepon" id="nomor_telepon" class="form-control border-start-0 ps-1" 
+                                   pattern="^08[0-9]{8,11}$" minlength="10" maxlength="13" required 
+                                   placeholder="Contoh: 081234567890"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
+                        <div class="form-text text-muted" style="font-size: 11px;">Nomor telepon harus berupa angka, diawali dengan 08, dan terdiri dari 10-13 digit.</div>
                     </div>
 
                     <!-- Password Portal -->

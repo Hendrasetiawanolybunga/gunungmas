@@ -279,7 +279,14 @@ def sopir_add(request):
     if request.method == 'POST':
         nama_sopir = request.POST.get('nama_sopir')
         nomor_lisensi = request.POST.get('nomor_lisensi')
-        nomor_telepon = request.POST.get('nomor_telepon')
+        nomor_telepon = request.POST.get('nomor_telepon', '').strip()
+        
+        import re
+        if not re.match(r'^08[0-9]{8,11}$', nomor_telepon):
+            messages.error(request, "Format nomor telepon tidak valid! Harus angka diawali 08 dan sepanjang 10-13 digit.")
+            context = {'username': request.session.get('admin_username')}
+            return render(request, 'core/sopir/add.html', context)
+            
         password = request.POST.get('password')
         status_tugas = request.POST.get('status_tugas', 'Tersedia')
         
@@ -308,7 +315,18 @@ def sopir_edit(request, id_sopir):
     if request.method == 'POST':
         sopir.nama_sopir = request.POST.get('nama_sopir')
         sopir.nomor_lisensi = request.POST.get('nomor_lisensi')
-        sopir.nomor_telepon = request.POST.get('nomor_telepon')
+        no_telp = request.POST.get('nomor_telepon', '').strip()
+        
+        import re
+        if not re.match(r'^08[0-9]{8,11}$', no_telp):
+            messages.error(request, "Format nomor telepon tidak valid! Harus angka diawali 08 dan sepanjang 10-13 digit.")
+            context = {
+                'username': request.session.get('admin_username'),
+                'sopir': sopir
+            }
+            return render(request, 'core/sopir/edit.html', context)
+            
+        sopir.nomor_telepon = no_telp
         sopir.status_tugas = request.POST.get('status_tugas')
         
         password = request.POST.get('password')
