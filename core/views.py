@@ -1454,24 +1454,13 @@ def sopir_dashboard(request):
     bus = Bus.objects.filter(sopir_id=sopir_id).first()
     
     jadwal_aktif = []
-    total_tiket = 0
     if bus:
         from datetime import date
         jadwal_aktif = Jadwal.objects.filter(bus=bus, tanggal_berangkat__gte=date.today()).order_by('tanggal_berangkat', 'jam_berangkat')
         
-        # Hitung tiket terjual untuk jadwal-jadwal tersebut
-        jadwal_ids = [j.id_jadwal for j in jadwal_aktif]
-        if jadwal_ids:
-            pemesanan_lunas = Pemesanan.objects.filter(
-                tiket__jadwal__in=jadwal_ids,
-                pembayaran__status='Lunas'
-            ).distinct()
-            total_tiket = sum(p.jumlah_tiket for p in pemesanan_lunas)
-            
     context = {
         'bus': bus,
         'jadwal_aktif': jadwal_aktif,
-        'total_tiket': total_tiket
     }
     return render(request, 'core/sopir_portal/dashboard.html', context)
 
